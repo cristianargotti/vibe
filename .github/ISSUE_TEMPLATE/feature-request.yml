@@ -1,0 +1,64 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please describe what you need.
+
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User Story
+      description: Describe the feature from the user's perspective
+      placeholder: "As a [role], I want [capability] so that [benefit]"
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Define when this feature is considered done
+      placeholder: |
+        - [ ] Given..., when..., then...
+        - [ ] Given..., when..., then...
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Implementation hints, dependencies, or constraints
+      placeholder: |
+        - Requires changes to the checkout service
+        - Must integrate with PIX payment provider
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      options:
+        - Catalog
+        - Cart / Checkout
+        - Payments
+        - Shipping
+        - User / Auth
+        - Search
+        - Infrastructure
+        - Observability
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative solutions you've considered
+    validations:
+      required: false

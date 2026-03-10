@@ -1,0 +1,37 @@
+name: Claude Security Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  security-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Run Claude Security Scan
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: "claude-sonnet-4-6"
+          prompt: |
+            Perform a security-focused review of this PR.
+            Check for OWASP Top 10 vulnerabilities:
+            - Injection (SQL, NoSQL, command injection)
+            - Broken authentication/authorization
+            - Sensitive data exposure (hardcoded secrets, PII in logs)
+            - XSS (unsanitized HTML rendering)
+            - Insecure deserialization
+            - Missing input validation
+
+            Dafiti-specific checks:
+            - LGPD compliance (PII handling, consent, data access logging)
+            - Payment data security (PCI DSS considerations)
+            - API key/credential exposure
+
+            Report findings by severity: Critical, High, Medium, Low.
+            Include file path, line number, and recommended fix.
+            If no issues found, confirm the PR passes security review.

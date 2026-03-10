@@ -1,0 +1,73 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(npx vitest *)",
+      "Bash(npx jest *)",
+      "Bash(pytest *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(terraform plan)",
+      "Bash(terraform validate)",
+      "Bash(docker build *)",
+      "Bash(docker compose *)",
+      "Bash(gh *)"
+    ],
+    "deny": [
+      "Read(.env*)",
+      "Read(secrets/**)",
+      "Read(*credentials*)",
+      "Read(*.pem)",
+      "Read(*.key)",
+      "Read(*.tfvars)",
+      "Bash(curl *)",
+      "Bash(wget *)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(rm *)",
+      "Bash(terraform apply *)",
+      "Bash(terraform destroy *)",
+      "Bash(docker run *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/block-dangerous-commands.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/post-edit-lint.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before finishing, verify: 1) All tests pass 2) No security issues introduced 3) Code follows project conventions in .claude/rules/ 4) No secrets or PII exposed"
+          }
+        ]
+      }
+    ]
+  }
+}
