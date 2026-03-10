@@ -83,6 +83,19 @@
           {
             "type": "command",
             "command": "hooks/block-dangerous-commands.sh"
+          },
+          {
+            "type": "command",
+            "command": "hooks/workflow-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/branch-guard.sh"
           }
         ]
       }

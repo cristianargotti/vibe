@@ -13,3 +13,5 @@ Always use OpenTelemetry for distributed tracing across services.
 Always validate LLM outputs with Pydantic/Zod schemas before using them.
 Always version-control prompts as code. Never hardcode prompts inline.
 Always document API endpoints with OpenAPI/Swagger specs.
+Never commit directly on main, master, or develop — always use a feature branch and PR.
+Never use --no-verify — fix the underlying issue instead of bypassing hooks.

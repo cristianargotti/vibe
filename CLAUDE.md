@@ -41,6 +41,14 @@ terraform validate    # Validate Terraform config
 - PRs: under 400 lines, one concern per PR
 - Testing: 80% coverage minimum, 100% on critical paths
 
+## Git Workflow
+
+- Never commit directly on main, master, or develop — always create a feature branch
+- Branch naming: `feat/`, `fix/`, `chore/`, `docs/`, `test/`, `refactor/` prefixes required
+- Commit messages must follow conventional commits: `type(scope): description`
+- After committing, push and create a PR — never merge locally
+- Never use `--no-verify` — fix the underlying issue instead
+
 ## For Detailed Standards
 
 When working on a specific technology, read the relevant file in `docs/standards/`:

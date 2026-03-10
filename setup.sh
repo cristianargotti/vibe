@@ -68,6 +68,22 @@ if [ -d "$SCRIPT_DIR/hooks" ]; then
   mkdir -p hooks
   cp -r "$SCRIPT_DIR/hooks/"* hooks/
   chmod +x hooks/*.sh
+  # Make native git hooks executable
+  if [ -d "hooks/git-hooks" ]; then
+    chmod +x hooks/git-hooks/*
+  fi
+fi
+
+# --- Configure native git hooks ---
+# Set git hooks path (skip if husky, lefthook, or pre-commit framework is detected)
+if [ -d "hooks/git-hooks" ]; then
+  if [ -f ".husky/_/husky.sh" ] || [ -f ".lefthook.yml" ] || [ -f ".pre-commit-config.yaml" ]; then
+    warn "Existing git hook framework detected — skipping git hooks path configuration"
+    warn "Manually integrate hooks/git-hooks/ with your hook framework"
+  else
+    git config core.hooksPath hooks/git-hooks
+    info "Configured git hooks path: hooks/git-hooks/"
+  fi
 fi
 
 # Copy docs/standards
@@ -155,7 +171,8 @@ info "Next steps:"
 echo "  1. Run: npm install"
 echo "  2. Set GITHUB_TOKEN for MCP GitHub server"
 echo "  3. Set ANTHROPIC_API_KEY in GitHub repo secrets (for CI workflows)"
-echo "  4. Start coding: claude"
+echo "  4. Enable branch protection on main in GitHub (Settings > Branches > Add rule)"
+echo "  5. Start coding: claude"
 echo ""
 info "Tips:"
 echo "  - Use /compact proactively to extend context"

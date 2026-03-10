@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Native git pre-commit hook: branch protection + secret detection.
+# Works for ALL git clients, not just Claude Code.
+
+set -euo pipefail
+
+# --- 1. Block commits on protected branches ---
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then
+  echo "ERROR: Cannot commit directly on '$BRANCH'."
+  echo "Create a feature branch: git checkout -b feat/your-feature"
+  exit 1
+fi
+
+# --- 2. Secret detection in staged files ---
+STAGED=$(git diff --cached --name-only 2>/dev/null || true)
+
+if [ -n "$STAGED" ]; then
+  SECRETS_FOUND=""
+  while IFS= read -r file; do
+    [ -f "$file" ] || continue
+    if grep -qE '(AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{20,}|sk-ant-[a-zA-Z0-9-]{20,}|-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----|ghp_[a-zA-Z0-9]{36}|password\s*=\s*["'"'"'][^\s"'"'"']{8,}["'"'"'])' "$file" 2>/dev/null; then
+      SECRETS_FOUND="${SECRETS_FOUND}  - ${file}\n"
+    fi
+  done <<< "$STAGED"
+  if [ -n "$SECRETS_FOUND" ]; then
+    echo "ERROR: Potential secrets detected in staged files:"
+    echo -e "$SECRETS_FOUND"
+    echo "Remove secrets and use environment variables or Secrets Manager."
+    exit 1
+  fi
+fi
+
+exit 0
