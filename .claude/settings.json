@@ -53,6 +53,7 @@
       "Bash(rm *)",
       "Bash(git checkout *)",
       "Bash(git merge *)",
+      "Bash(git push *)",
       "Bash(docker run *)",
       "Skill(review-security)",
       "Skill(fix-issue *)",
@@ -72,11 +73,7 @@
       "Bash(curl *)",
       "Bash(wget *)"
     ],
-    "ask": [
-      "Bash(git push *)",
-      "Bash(terraform apply *)",
-      "Bash(terraform destroy *)"
-    ]
+    "ask": ["Bash(terraform apply *)", "Bash(terraform destroy *)"]
   },
   "hooks": {
     "PreToolUse": [
