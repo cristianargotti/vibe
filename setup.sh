@@ -31,14 +31,17 @@ else
 fi
 
 # --- Target directory setup ---
-if [ "$TARGET_DIR" != "." ] && [ "$TARGET_DIR" != "$SCRIPT_DIR" ]; then
-  info "Setting up in: $TARGET_DIR"
-  mkdir -p "$TARGET_DIR"
-  cd "$TARGET_DIR"
-else
-  TARGET_DIR="$SCRIPT_DIR"
-  cd "$TARGET_DIR"
+TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
+
+if [ "$TARGET_DIR" = "$SCRIPT_DIR" ]; then
+  info "Running in the Vibe template directory itself — nothing to copy."
+  info "Usage: ./setup.sh /path/to/your/project"
+  exit 0
 fi
+
+info "Setting up in: $TARGET_DIR"
+mkdir -p "$TARGET_DIR"
+cd "$TARGET_DIR"
 
 # --- Git init if needed ---
 if [ ! -d ".git" ]; then
