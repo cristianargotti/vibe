@@ -16,6 +16,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,6 +25,7 @@ jobs:
       - name: Handle Claude Issue
         uses: anthropics/claude-code-action@v1
         with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           trigger_phrase: "@claude"
           prompt: |
             You are a Dafiti engineering assistant. Based on the issue label or comment:
@@ -53,5 +55,3 @@ jobs:
             - If asked to make changes, follow the appropriate flow above
 
             Always follow the guidelines in REVIEW.md and .claude/rules/.
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
