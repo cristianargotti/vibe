@@ -17,14 +17,18 @@ jobs:
       pull-requests: write
       issues: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Run Claude Code Review
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_args: "--model claude-sonnet-4-6"
           prompt: |
             Review this PR following the guidelines in REVIEW.md.
             Check against all rules in .claude/rules/.
             Focus on: security, correctness, architecture, then quality.
             Be specific with file paths and line numbers.
             Group findings by severity: Must Fix, Should Fix, Consider, Praise.
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
