@@ -1,9 +1,11 @@
 # Vibe — Dafiti Engineering Standards
 
 ## Project Overview
+
 Claude Code configuration template for Dafiti teams. Enforces security, architecture, and quality standards across TypeScript/Node.js, React/Next.js, Python, Terraform, Docker, and AWS.
 
 ## Tech Stack
+
 - **Backend**: TypeScript, NestJS, Python, FastAPI
 - **Frontend**: React, Next.js (App Router), TanStack Query, Zustand
 - **Data/ML**: Python, Pydantic, LangChain
@@ -12,6 +14,7 @@ Claude Code configuration template for Dafiti teams. Enforces security, architec
 - **Observability**: pino, structlog, OpenTelemetry
 
 ## Critical Commands
+
 ```bash
 npm run lint          # ESLint check
 npm run lint:fix      # ESLint auto-fix
@@ -25,19 +28,23 @@ terraform validate    # Validate Terraform config
 ```
 
 ## Architecture
+
 - **Hexagonal architecture**: Controller → Service → Repository
 - **API format**: RESTful, standard error `{"error":{"code":"...","message":"..."}}`
 - **Auth**: JWT (15min) + refresh tokens
 - **State**: TanStack Query (server), Zustand (client)
 
 ## Conventions
+
 - Conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`
 - Branch naming: `feat/`, `fix/`, `chore/`
 - PRs: under 400 lines, one concern per PR
 - Testing: 80% coverage minimum, 100% on critical paths
 
 ## For Detailed Standards
+
 When working on a specific technology, read the relevant file in `docs/standards/`:
+
 - TypeScript patterns → `docs/standards/typescript.md`
 - NestJS architecture → `docs/standards/nestjs.md`
 - React/Next.js → `docs/standards/react-nextjs.md`
@@ -52,6 +59,7 @@ When working on a specific technology, read the relevant file in `docs/standards
 - Testing → `docs/standards/testing.md`
 
 ## Security
+
 - Never hardcode secrets — use env vars or Secrets Manager
 - Always validate inputs at API boundaries
 - Always use parameterized queries
@@ -59,9 +67,11 @@ When working on a specific technology, read the relevant file in `docs/standards
 - Run `npm audit` / `pip audit` before deploying
 
 ## Available Skills
+
 - `/review-security` — OWASP-based security review
 - `/fix-issue <number>` — Analyze and fix GitHub issue
 - `/create-pr [base]` — Create structured PR
 - `/refactor <path>` — Refactor with behavior preservation
 - `/test <path>` — Generate and run tests
 - `/deploy-check` — Pre-deployment verification checklist
+- `/simplify` — Review changed code for reuse and efficiency
