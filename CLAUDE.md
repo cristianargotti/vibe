@@ -75,3 +75,9 @@ When working on a specific technology, read the relevant file in `docs/standards
 - `/test <path>` — Generate and run tests
 - `/deploy-check` — Pre-deployment verification checklist
 - `/simplify` — Review changed code for reuse and efficiency
+
+## GitHub Automation
+
+- PR Review: automatic on every PR (Claude reviews against `.claude/rules/`)
+- Security Review: automatic OWASP scan on every PR
+- Issue Handler: label issues with `claude-fix`, `claude-feature`, or `claude-refactor`
