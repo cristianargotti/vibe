@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # React & Next.js Standards
 
 Tier 2 reference for frontend applications built with React 18+ and Next.js App Router.

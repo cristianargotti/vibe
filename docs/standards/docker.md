@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # Docker Standards
 
 Tier 2 reference for containerization at Dafiti. All services MUST be containerized following these patterns.
@@ -106,7 +108,7 @@ services:
       target: dev
     volumes:
       - .:/app
-      - /app/node_modules        # anonymous volume prevents overwrite
+      - /app/node_modules # anonymous volume prevents overwrite
     ports:
       - "3000:3000"
     env_file: .env
@@ -168,7 +170,7 @@ services:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
     tmpfs:
-      - /var/lib/postgresql/data    # RAM-backed for speed
+      - /var/lib/postgresql/data # RAM-backed for speed
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U test"]
       interval: 3s

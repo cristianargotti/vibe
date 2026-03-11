@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # Terraform Standards
 
 Tier 2 reference for infrastructure-as-code at Dafiti. All cloud resources MUST be provisioned through Terraform.

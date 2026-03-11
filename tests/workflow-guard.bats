@@ -248,3 +248,9 @@ run_hook() {
   result=$(run_hook "git commit -m 'feat: single quoted'")
   [[ -z "$result" ]]
 }
+
+# --- Secret Detection: verify patterns load from external file ---
+
+@test "secret-patterns.txt is used by workflow-guard" {
+  grep -q "secret-patterns.txt" "$HOOK"
+}

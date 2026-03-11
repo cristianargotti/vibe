@@ -24,6 +24,11 @@ if [ ! -f "vibe.config.json" ]; then
   WARNINGS="${WARNINGS}No vibe.config.json found — run /vibe:setup to configure. "
 fi
 
+# Check versions.json freshness (lightweight)
+if [ -f "versions.json" ]; then
+  jq empty versions.json 2>/dev/null || WARNINGS="${WARNINGS}versions.json is invalid JSON. "
+fi
+
 if [ -n "$WARNINGS" ]; then
   echo "Vibe: $WARNINGS"
 fi

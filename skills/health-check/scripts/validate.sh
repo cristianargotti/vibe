@@ -122,7 +122,25 @@ echo ""
 
 # 7. Version check
 echo "Version:"
-if [ -f "$PLUGIN_ROOT/.claude-code-version" ]; then
+if [ -f "$PLUGIN_ROOT/versions.json" ]; then
+  if jq empty "$PLUGIN_ROOT/versions.json" 2>/dev/null; then
+    pass "versions.json is valid JSON"
+    TRACKED=$(jq -r '.claudeCode' "$PLUGIN_ROOT/versions.json")
+    if command -v claude &>/dev/null; then
+      INSTALLED=$(claude --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
+      if [ "$TRACKED" = "$INSTALLED" ]; then
+        pass "Claude Code version matches: $TRACKED"
+      else
+        warn "Claude Code version mismatch: tracked=$TRACKED installed=$INSTALLED"
+      fi
+    else
+      warn "Claude CLI not found — cannot verify version"
+    fi
+  else
+    fail "versions.json is invalid JSON"
+  fi
+elif [ -f "$PLUGIN_ROOT/.claude-code-version" ]; then
+  warn "Using legacy .claude-code-version — migrate to versions.json"
   TRACKED=$(cat "$PLUGIN_ROOT/.claude-code-version" | tr -d '[:space:]')
   if command -v claude &>/dev/null; then
     INSTALLED=$(claude --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
@@ -135,7 +153,39 @@ if [ -f "$PLUGIN_ROOT/.claude-code-version" ]; then
     warn "Claude CLI not found — cannot verify version"
   fi
 else
-  fail ".claude-code-version not found"
+  fail "No version tracking file found (versions.json or .claude-code-version)"
+fi
+echo ""
+
+# 8. Secret patterns
+echo "Secret Patterns:"
+if [ -f "$PLUGIN_ROOT/hooks/secret-patterns.txt" ]; then
+  PATTERN_COUNT=$(grep -v '^#' "$PLUGIN_ROOT/hooks/secret-patterns.txt" | grep -v '^$' | wc -l | tr -d ' ')
+  if [ "$PATTERN_COUNT" -ge 25 ]; then
+    pass "secret-patterns.txt has $PATTERN_COUNT patterns"
+  else
+    warn "secret-patterns.txt has only $PATTERN_COUNT patterns (expected 25+)"
+  fi
+else
+  fail "hooks/secret-patterns.txt not found"
+fi
+echo ""
+
+# 9. Dependabot
+echo "Auto-updates:"
+if [ -f "$PLUGIN_ROOT/.github/dependabot.yml" ]; then
+  pass "dependabot.yml present"
+else
+  warn "dependabot.yml not found — npm and GitHub Actions won't auto-update"
+fi
+
+# Check MCP template doesn't use deprecated server
+if [ -f "$PLUGIN_ROOT/skills/setup/templates/mcp.json" ]; then
+  if grep -q "@modelcontextprotocol/server-github" "$PLUGIN_ROOT/skills/setup/templates/mcp.json"; then
+    warn "MCP template uses deprecated @modelcontextprotocol/server-github — migrate to ghcr.io/github/github-mcp-server"
+  else
+    pass "MCP template uses current GitHub MCP server"
+  fi
 fi
 echo ""
 

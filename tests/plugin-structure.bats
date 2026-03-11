@@ -224,10 +224,24 @@
 
 # --- Version Tracker ---
 
-@test ".claude-code-version exists and has version" {
-  [[ -f ".claude-code-version" ]]
-  version=$(cat .claude-code-version)
-  [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+@test "versions.json exists and is valid JSON" {
+  [[ -f "versions.json" ]]
+  jq empty versions.json
+}
+
+@test "versions.json has plugin version" {
+  result=$(jq -r '.plugin' versions.json)
+  [[ "$result" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+}
+
+@test "versions.json has claudeCode version" {
+  result=$(jq -r '.claudeCode' versions.json)
+  [[ "$result" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+}
+
+@test "versions.json has mcp section" {
+  count=$(jq '.mcp | length' versions.json)
+  [[ "$count" -ge 3 ]]
 }
 
 # --- No Legacy References ---
@@ -281,6 +295,28 @@
 
 @test "README does not mention bash /tmp/vibe/setup.sh" {
   ! grep -q "/tmp/vibe/setup.sh" README.md
+}
+
+# --- Dependabot ---
+
+@test "dependabot.yml exists" {
+  [[ -f ".github/dependabot.yml" ]]
+}
+
+# --- Secret Patterns ---
+
+@test "secret-patterns.txt exists" {
+  [[ -f "hooks/secret-patterns.txt" ]]
+}
+
+# --- MCP Template ---
+
+@test "MCP template does not use deprecated server-github" {
+  ! grep -q "@modelcontextprotocol/server-github" skills/setup/templates/mcp.json
+}
+
+@test "MCP template uses Docker for GitHub MCP" {
+  grep -q "github-mcp-server" skills/setup/templates/mcp.json
 }
 
 # --- LICENSE ---

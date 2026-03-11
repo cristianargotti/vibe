@@ -96,7 +96,14 @@ jobs:
       - name: Check Claude Code version
         if: github.event_name == 'schedule'
         run: |
-          TRACKED=$(cat .claude-code-version | tr -d '[:space:]')
+          if [ -f "versions.json" ]; then
+            TRACKED=$(jq -r '.claudeCode' versions.json)
+          elif [ -f ".claude-code-version" ]; then
+            TRACKED=$(cat .claude-code-version | tr -d '[:space:]')
+          else
+            echo "::warning::No version tracking file found"
+            exit 0
+          fi
           echo "Tracked version: $TRACKED"
           # Check latest version from npm
           LATEST=$(npm view @anthropic-ai/claude-code version 2>/dev/null || echo "unknown")

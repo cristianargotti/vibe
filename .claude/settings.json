@@ -54,6 +54,7 @@
       "Bash(git merge *)",
       "Bash(git push *)",
       "Bash(docker run *)",
+      "Bash(uvx *)",
       "Skill(vibe:review-security)",
       "Skill(vibe:fix-issue *)",
       "Skill(vibe:create-pr *)",

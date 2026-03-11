@@ -67,11 +67,18 @@ fi
 if echo "$COMMAND" | grep -qE 'git[[:space:]]+commit\b'; then
   STAGED=$(git diff --cached --name-only 2>/dev/null || true)
   if [ -n "$STAGED" ]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    PATTERN_FILE="${SCRIPT_DIR}/secret-patterns.txt"
+    if [ -f "$PATTERN_FILE" ]; then
+      PATTERNS=$(grep -v '^#' "$PATTERN_FILE" | grep -v '^$' | paste -sd'|' -)
+    else
+      PATTERNS='AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{20,}|sk-ant-[a-zA-Z0-9_-]{20,}|-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9_-]{20,}|xoxb-[a-zA-Z0-9-]+'
+    fi
     SECRETS_FOUND=""
     while IFS= read -r file; do
       [ -f "$file" ] || continue
       # Scan only the staged diff, not the entire file
-      if git diff --cached -- "$file" 2>/dev/null | grep -qE '^\+.*(AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{20,}|sk-ant-[a-zA-Z0-9-]{20,}|-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9_-]{20,}|xoxb-[a-zA-Z0-9-]+)'; then
+      if git diff --cached -- "$file" 2>/dev/null | grep -qE "^\+.*($PATTERNS)"; then
         SECRETS_FOUND="${SECRETS_FOUND}${file} "
       fi
     done <<< "$STAGED"

@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # NestJS Standards
 
 Tier 2 reference for NestJS service architecture following hexagonal design principles.

@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # Observability Standards
 
 ## Structured Logging
@@ -52,7 +54,10 @@ app.use((req, res, next) => {
   const start = performance.now();
   res.on("finish", () => {
     const duration_ms = Math.round(performance.now() - start);
-    req.log.info({ statusCode: res.statusCode, duration_ms }, "request completed");
+    req.log.info(
+      { statusCode: res.statusCode, duration_ms },
+      "request completed",
+    );
   });
   next();
 });
@@ -130,7 +135,9 @@ import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 const sdk = new NodeSDK({
   resource: new Resource({ [ATTR_SERVICE_NAME]: process.env.SERVICE_NAME }),
   traceExporter: new OTLPTraceExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318/v1/traces",
+    url:
+      process.env.OTEL_EXPORTER_OTLP_ENDPOINT ??
+      "http://localhost:4318/v1/traces",
   }),
   instrumentations: [new HttpInstrumentation(), new PgInstrumentation()],
 });
@@ -187,9 +194,16 @@ const httpRequestDuration = new Histogram({
 
 // Middleware
 app.use((req, res, next) => {
-  const end = httpRequestDuration.startTimer({ method: req.method, route: req.route?.path ?? req.path });
+  const end = httpRequestDuration.startTimer({
+    method: req.method,
+    route: req.route?.path ?? req.path,
+  });
   res.on("finish", () => {
-    httpRequestsTotal.inc({ method: req.method, route: req.route?.path ?? req.path, status_code: res.statusCode });
+    httpRequestsTotal.inc({
+      method: req.method,
+      route: req.route?.path ?? req.path,
+      status_code: res.statusCode,
+    });
     end();
   });
   next();
@@ -253,7 +267,9 @@ app.get("/readyz", async (_req, res) => {
   }
 
   const healthy = Object.values(checks).every((v) => v === "ok");
-  res.status(healthy ? 200 : 503).json({ status: healthy ? "ok" : "degraded", checks });
+  res
+    .status(healthy ? 200 : 503)
+    .json({ status: healthy ? "ok" : "degraded", checks });
 });
 ```
 
@@ -279,18 +295,24 @@ Every alert must link to a runbook. Use this structure:
 
 ```markdown
 ## Alert: <AlertName>
+
 ### Impact
+
 What user-facing behavior is affected.
 
 ### Detection
+
 The Prometheus query or dashboard link that shows the problem.
 
 ### Mitigation
+
 Step-by-step actions to restore service (restart, rollback, scale).
 
 ### Root Cause Investigation
+
 Where to look: logs, traces, recent deploys, dependency status.
 
 ### Escalation
+
 Who to contact if mitigation does not resolve within 15 minutes.
 ```

@@ -46,10 +46,13 @@ Ask the user (use AskUserQuestion with multiSelect: true):
 **Question**: "Which integrations should be enabled?"
 **Options**:
 
-- GitHub MCP (PRs, issues from Claude)
+- GitHub MCP (PRs, issues from Claude — via Docker)
 - GitHub Actions (PR review, security review, issue handler)
 - Context7 MCP (contextual documentation)
 - Sequential Thinking MCP
+- AWS MCP (S3, IAM, VPC, CloudFormation — requires uvx)
+- ESLint MCP (lint diagnostics in Claude)
+- Terraform MCP (plan/validate/apply via Docker)
 
 ### Step 4: Skills
 
@@ -173,3 +176,11 @@ Next steps:
   2. Add CLAUDE_CODE_OAUTH_TOKEN to GitHub repo secrets
   3. Start coding!
 ```
+
+After showing the summary, ask (use AskUserQuestion):
+
+**Question**: "Do you want Vibe to create a quarterly standards review issue in this repo?"
+**Options**:
+
+- **Yes** — Creates a GitHub issue with a checklist to review all standards every 3 months
+- **No** — Skip, I'll review standards manually

@@ -157,7 +157,7 @@ The interactive wizard configures everything in 4 steps:
 
 **Step 2 — Security Level**: Basic (rules only), Standard (+ hooks), Strict (+ full protection)
 
-**Step 3 — Integrations**: GitHub MCP, GitHub Actions, Context7 MCP, Sequential Thinking MCP
+**Step 3 — Integrations**: GitHub MCP, GitHub Actions, Context7 MCP, Sequential Thinking MCP, AWS MCP, ESLint MCP, Terraform MCP
 
 **Step 4 — Skills**: Choose which `/vibe:*` skills to enable
 
@@ -224,11 +224,14 @@ Configuration is saved to `vibe.config.json` (gitignored, per-project). Run `/vi
 
 ## MCP Servers
 
-| Server              | Purpose                                   | Auth           |
-| ------------------- | ----------------------------------------- | -------------- |
-| GitHub              | Repo management, issues, PRs from Claude  | `GITHUB_TOKEN` |
-| Context7            | Up-to-date library documentation          | None           |
-| Sequential Thinking | Structured reasoning for complex problems | None           |
+| Server              | Purpose                                   | Auth           | Transport |
+| ------------------- | ----------------------------------------- | -------------- | --------- |
+| GitHub              | Repo management, issues, PRs from Claude  | `GITHUB_TOKEN` | Docker    |
+| Context7            | Up-to-date library documentation          | None           | npx       |
+| Sequential Thinking | Structured reasoning for complex problems | None           | npx       |
+| AWS _(optional)_    | S3, IAM, VPC, CloudFormation management   | `AWS_PROFILE`  | uvx       |
+| ESLint _(optional)_ | Lint diagnostics integrated in Claude     | None           | npx       |
+| Terraform _(opt.)_  | Plan/validate/apply via Docker            | None           | Docker    |
 
 ## Two-Tier Architecture
 
@@ -262,11 +265,23 @@ Files in `docs/standards/` — full patterns with code examples. Claude reads th
 
 ## Auto-updates
 
-Vibe tracks the installed Claude Code version in `.claude-code-version`.
+Vibe has 6 layers of auto-updating to stay current without manual intervention:
 
-- **Weekly CI**: compares tracked vs latest npm version, creates issue on drift
-- **On-demand**: `/vibe:whats-new` checks changelog and analyzes impact on Vibe
+| Layer          | Component                | Mechanism                      | Frequency |
+| -------------- | ------------------------ | ------------------------------ | --------- |
+| npm deps       | eslint, prettier         | Dependabot PRs                 | Weekly    |
+| GitHub Actions | checkout, claude-code    | Dependabot PRs                 | Weekly    |
+| MCP servers    | github, context7, aws... | `check-mcp-versions.yml`       | Weekly    |
+| Claude Code    | CLI version              | `validate-plugin.yml`          | Weekly    |
+| Secrets        | Detection patterns       | Manual + issue tracker         | As-needed |
+| Plugin         | Vibe itself              | Plugin marketplace auto-update | On push   |
+
+Version tracking is centralized in `versions.json` (replaces `.claude-code-version`).
+
+- **Weekly CI**: compares tracked vs latest versions, creates issue on drift
+- **On-demand**: `/vibe:whats-new` checks Claude Code changelog, MCP versions, and standards freshness
 - **Plugin update**: `/plugin marketplace update` pulls latest Vibe
+- **Standards review**: `check-mcp-versions.yml` flags standards not reviewed in 6+ months
 
 ## GitHub Automation
 
@@ -276,6 +291,7 @@ Vibe tracks the installed Claude Code version in `.claude-code-version`.
 | `claude-security-review.yml` | PR open/sync                 | OWASP security scan + LGPD checks       |
 | `claude-issue-handler.yml`   | Labels, @claude              | Auto-fix/feature/refactor from issues   |
 | `validate-plugin.yml`        | Push to plugin files, weekly | Plugin structure + version validation   |
+| `check-mcp-versions.yml`     | Weekly                       | MCP version drift + standards freshness |
 
 ### Setup
 
@@ -367,16 +383,17 @@ vibe/
 │   ├── branch-guard.sh
 │   ├── post-edit-lint.sh
 │   ├── validate-config.sh
+│   ├── secret-patterns.txt      # 30+ secret detection patterns
 │   └── git-hooks/               # Native git hooks (all clients)
 │       ├── pre-commit
 │       └── commit-msg
 ├── docs/standards/              # 12 detailed coding standards
 ├── .claude/rules/               # 5 lean rule files (always loaded)
-├── .github/workflows/           # 4 CI/CD workflows
+├── .github/workflows/           # 5 CI/CD workflows
 ├── settings.json                # Plugin-level default permissions
+├── versions.json                # Centralized version tracking
 ├── CLAUDE.md                    # Configuration hub
 ├── REVIEW.md                    # Code review guidelines
-├── .claude-code-version         # Version tracker
 └── LICENSE
 ```
 

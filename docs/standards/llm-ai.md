@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # LLM & AI Integration Standards
 
 ## Prompt Engineering Patterns

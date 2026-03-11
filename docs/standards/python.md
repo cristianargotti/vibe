@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # Python Standards
 
 Tier 2 reference for Python services at Dafiti, targeting Python 3.11+.

@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # AWS Standards
 
 Tier 2 reference for AWS service usage at Dafiti. All infrastructure follows least-privilege, encryption-at-rest, and cost-visibility principles.

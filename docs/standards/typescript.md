@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # TypeScript Standards
 
 Tier 2 reference for strict TypeScript patterns used across Dafiti services.

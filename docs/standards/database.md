@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # Database Standards
 
 Tier 2 reference for database design, ORMs, migrations, caching, and connection management at Dafiti.
