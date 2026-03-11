@@ -2,6 +2,8 @@
 
 Claude Code plugin for Dafiti engineering teams. Security, architecture, and quality standards — configured interactively, enforced automatically.
 
+**[Documentation](https://cristianargotti.github.io/vibe/)** | **[Getting Started](https://cristianargotti.github.io/vibe/getting-started/introduction/)**
+
 ## What is Vibe
 
 Vibe is a **Claude Code plugin** that brings Dafiti's engineering standards into every coding session:

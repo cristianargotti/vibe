@@ -55,3 +55,9 @@ crash.log
 
 # Vibe (project-specific config, not committed)
 vibe.config.json
+
+# Docs (Starlight build artifacts)
+docs/node_modules/
+docs/dist/
+docs/.astro/
+docs/src/content/docs/standards/
