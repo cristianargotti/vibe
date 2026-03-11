@@ -52,3 +52,6 @@ crash.log
 
 # Claude Code
 .claude/settings.local.json
+
+# Vibe (project-specific config, not committed)
+vibe.config.json

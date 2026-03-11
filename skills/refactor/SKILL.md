@@ -1,5 +1,7 @@
 ---
+name: refactor
 description: ALWAYS invoke when user types /refactor. Refactors code while preserving behavior, verified by tests.
+argument-hint: "<path>"
 model: sonnet
 context: fork
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash
@@ -10,6 +12,7 @@ allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 Refactor the specified path while preserving existing behavior, verified by tests.
 
 ## Arguments
+
 - Target path (required): `$ARGUMENTS`
 
 ## Instructions
@@ -33,6 +36,7 @@ Refactor the specified path while preserving existing behavior, verified by test
 7. **Summary**: Output what was refactored and why
 
 ## Rules
+
 - NEVER change behavior — only improve structure
 - NEVER skip running tests between changes
 - NEVER refactor test files (unless explicitly asked)

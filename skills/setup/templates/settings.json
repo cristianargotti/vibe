@@ -1,4 +1,5 @@
 {
+  "_comment": "Template for .claude/settings.json — customize based on security level",
   "permissions": {
     "allow": [
       "Read",
@@ -53,14 +54,7 @@
       "Bash(git checkout *)",
       "Bash(git merge *)",
       "Bash(git push *)",
-      "Bash(docker run *)",
-      "Skill(review-security)",
-      "Skill(fix-issue *)",
-      "Skill(create-pr *)",
-      "Skill(refactor *)",
-      "Skill(test *)",
-      "Skill(deploy-check)",
-      "Skill(simplify)"
+      "Bash(docker run *)"
     ],
     "deny": [
       "Read(.env*)",
@@ -73,5 +67,16 @@
       "Bash(wget *)"
     ],
     "ask": ["Bash(terraform apply *)", "Bash(terraform destroy *)"]
+  },
+  "extraKnownMarketplaces": {
+    "dafiti-tools": {
+      "source": {
+        "source": "github",
+        "repo": "dafiti-group/vibe"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "vibe@dafiti-tools": true
   }
 }

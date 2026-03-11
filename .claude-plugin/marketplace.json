@@ -1,0 +1,17 @@
+{
+  "name": "dafiti-tools",
+  "owner": {
+    "name": "AI Core Team — Dafiti",
+    "email": "ai-core@dafiti.com"
+  },
+  "plugins": [
+    {
+      "name": "vibe",
+      "source": {
+        "source": "github",
+        "repo": "dafiti-group/vibe"
+      },
+      "description": "Dafiti engineering standards — security, architecture, and quality guards"
+    }
+  ]
+}

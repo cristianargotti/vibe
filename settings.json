@@ -53,14 +53,7 @@
       "Bash(git checkout *)",
       "Bash(git merge *)",
       "Bash(git push *)",
-      "Bash(docker run *)",
-      "Skill(review-security)",
-      "Skill(fix-issue *)",
-      "Skill(create-pr *)",
-      "Skill(refactor *)",
-      "Skill(test *)",
-      "Skill(deploy-check)",
-      "Skill(simplify)"
+      "Bash(docker run *)"
     ],
     "deny": [
       "Read(.env*)",
@@ -72,6 +65,9 @@
       "Bash(curl *)",
       "Bash(wget *)"
     ],
-    "ask": ["Bash(terraform apply *)", "Bash(terraform destroy *)"]
+    "ask": [
+      "Bash(terraform apply *)",
+      "Bash(terraform destroy *)"
+    ]
   }
 }

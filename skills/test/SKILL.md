@@ -1,8 +1,20 @@
+---
+name: test
+description: ALWAYS invoke when user types /test. Generates and runs tests for the specified path.
+argument-hint: "<path>"
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash
+---
+
+# Generate and Run Tests
+
 Generate and run tests for the specified path.
 
-Target: $ARGUMENTS
+## Arguments
 
-Instructions:
+- Target path (required): `$ARGUMENTS`
+
+## Instructions
+
 1. Read `docs/standards/testing.md` for testing patterns
 2. Analyze the target file/directory to understand the code
 3. Generate tests covering:

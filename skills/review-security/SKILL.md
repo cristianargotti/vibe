@@ -1,4 +1,5 @@
 ---
+name: review-security
 description: ALWAYS invoke when user types /review-security. Performs OWASP-based security review of the codebase.
 model: opus
 context: fork
@@ -16,6 +17,7 @@ Perform a comprehensive OWASP-based security review of the codebase.
 3. Scan the codebase for vulnerabilities:
 
 ### OWASP Top 10 Checks
+
 - **Injection**: Search for string concatenation in SQL/NoSQL queries, unsanitized user input
 - **Broken Auth**: Check JWT implementation, session management, password storage
 - **Sensitive Data Exposure**: Search for hardcoded secrets, PII in logs, unencrypted data
@@ -28,6 +30,7 @@ Perform a comprehensive OWASP-based security review of the codebase.
 - **Insufficient Logging**: Verify security events are logged
 
 ### Dafiti-Specific Checks
+
 - LGPD compliance: PII encryption, data access logging, consent management
 - Payment data: PCI DSS considerations for card data, PIX, Boleto
 - API keys and credentials in code or config files
@@ -36,19 +39,24 @@ Perform a comprehensive OWASP-based security review of the codebase.
 
 Report findings grouped by severity:
 
-### 🔴 Critical
+### Critical
+
 [Findings that need immediate fix]
 
-### 🟠 High
+### High
+
 [Findings that should be fixed before next release]
 
-### 🟡 Medium
+### Medium
+
 [Findings to address in upcoming sprints]
 
-### 🔵 Low
+### Low
+
 [Recommendations for improvement]
 
-### ✅ Passing
+### Passing
+
 [Security practices correctly implemented]
 
 Include file path, line number, and recommended fix for each finding.

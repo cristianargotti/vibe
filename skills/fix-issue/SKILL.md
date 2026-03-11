@@ -1,5 +1,7 @@
 ---
+name: fix-issue
 description: ALWAYS invoke when user types /fix-issue. Reads a GitHub issue and implements the fix with tests.
+argument-hint: "<issue-number>"
 model: opus
 ---
 
@@ -8,6 +10,7 @@ model: opus
 Read a GitHub issue, analyze the codebase, implement the fix, and create a commit.
 
 ## Arguments
+
 - Issue number (required): `$ARGUMENTS`
 
 ## Instructions
@@ -33,6 +36,7 @@ Read a GitHub issue, analyze the codebase, implement the fix, and create a commi
 10. **Summary**: Output what was changed and why
 
 ## Rules
+
 - Never introduce new `any` types
 - Always add structured logging for the fix
 - Always validate inputs if the fix involves user data

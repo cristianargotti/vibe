@@ -1,0 +1,62 @@
+name: Claude Issue Handler
+
+on:
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+
+jobs:
+  handle-claude-labels:
+    if: |
+      (github.event_name == 'issues' && (github.event.label.name == 'claude-fix' || github.event.label.name == 'claude-feature' || github.event.label.name == 'claude-refactor')) ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') && !github.event.issue.pull_request)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: claude-issue-${{ github.event.issue.number }}
+      cancel-in-progress: true
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Handle Claude Issue
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          trigger_phrase: "@claude"
+          prompt: |
+            You are a Dafiti engineering assistant. Based on the issue label or comment:
+
+            For `claude-fix` label:
+            - Analyze the bug report
+            - Find the root cause in the codebase
+            - Implement a fix following .claude/rules/
+            - Add regression tests
+            - Create a PR with conventional commit message (fix: ...)
+
+            For `claude-feature` label:
+            - Analyze the feature request
+            - Plan the implementation following project architecture
+            - Implement the feature following .claude/rules/
+            - Add tests (80% coverage minimum)
+            - Create a PR with conventional commit message (feat: ...)
+
+            For `claude-refactor` label:
+            - Analyze the code area mentioned
+            - Refactor following docs/standards/ patterns
+            - Preserve existing behavior (verify with tests)
+            - Create a PR with conventional commit message (refactor: ...)
+
+            For @claude mentions:
+            - Respond to the question or request in the comment
+            - If asked to make changes, follow the appropriate flow above
+
+            Always follow the guidelines in REVIEW.md and .claude/rules/.

@@ -1,5 +1,7 @@
 # Code Review Guidelines
 
+Use `/vibe:review-security` for automated OWASP-based security reviews.
+
 ## Review Priorities (ordered by importance)
 
 1. **Security** — Injection, auth, secrets exposure, input validation, LGPD compliance

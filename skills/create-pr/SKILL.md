@@ -1,6 +1,19 @@
+---
+name: create-pr
+description: ALWAYS invoke when user types /create-pr. Creates a structured pull request for the current branch.
+argument-hint: "[base-branch]"
+allowed-tools: Read, Grep, Glob, Bash
+---
+
+# Create Pull Request
+
 Create a pull request for the current branch.
 
-Instructions:
+## Arguments
+
+- Base branch (optional): `$ARGUMENTS` (defaults to `main`)
+
+## Instructions
 
 1. Run `git diff --stat $ARGUMENTS...HEAD` to see all changes (use `main` as default base if no argument provided)
 2. Run `git log --oneline $ARGUMENTS...HEAD` to see commit history

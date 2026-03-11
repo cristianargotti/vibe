@@ -1,171 +1,151 @@
-# Vibe — Claude Code Configuration Template
+# Vibe — Dafiti Engineering Standards Plugin
 
-Claude Code configuration template for Dafiti engineering teams. Get best practices, security rules, design patterns, hooks, skills, MCP servers, and GitHub automation from day one.
+Claude Code plugin for Dafiti engineering teams. Enforces security, architecture, and quality standards with interactive configuration, automated hooks, and specialized skills.
 
-## Quick Start
+## Installation
 
-### New project (use as template)
+### As a Claude Code Plugin (recommended)
 
-1. Click **"Use this template"** on GitHub
-2. Clone your new repo
-3. Run setup:
-
-```bash
-npm install
-chmod +x hooks/*.sh
-cp .claude/settings.local.json.example .claude/settings.local.json
-claude
+```
+/plugin marketplace add dafiti-group/vibe
+/plugin install vibe
+/vibe:setup
 ```
 
-### Existing project (add to your repo)
+### Manual Setup (legacy)
 
 ```bash
-git clone https://github.com/dafiti/vibe.git /tmp/vibe
+git clone https://github.com/dafiti-group/vibe.git /tmp/vibe
 cd /path/to/your/project
 bash /tmp/vibe/setup.sh .
 rm -rf /tmp/vibe
 ```
 
-The setup script will:
+## Configuration
 
-- Copy `.claude/`, `hooks/`, `docs/standards/`, `.github/`, `CLAUDE.md`, `REVIEW.md`, `.mcp.json`
-- Smart-merge your `.gitignore` (append missing entries)
-- Add ESLint/Prettier to your `package.json`
-- Create `.claude/settings.local.json` from template
-- Set `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=90` in your shell profile
+Run `/vibe:setup` to launch the interactive wizard. It guides you through:
 
-## Two-Tier Architecture
+1. **Tech Stack** — TypeScript/NestJS, React/Next.js, Python/FastAPI, Terraform/AWS, Docker
+2. **Security Level** — Basic, Standard, or Strict
+3. **Integrations** — GitHub MCP, GitHub Actions, Context7, Sequential Thinking
+4. **Skills** — Choose which skills to enable
 
-Vibe uses a performance-optimized two-tier system to keep Claude's context budget lean:
+Configuration is saved to `vibe.config.json` (gitignored, project-specific).
 
-### Tier 1: Rules (always loaded, ~150 lines)
+## Security Levels
 
-Files in `.claude/rules/` are loaded **eagerly at startup**. They contain lean "Always/Never" directives — no code examples, no verbose explanations:
+| Feature | Basic | Standard | Strict |
+| --- | --- | --- | --- |
+| Rules in `.claude/rules/` | Yes | Yes | Yes |
+| Block dangerous commands | No | Yes | Yes |
+| Post-edit auto-format | No | Yes | Yes |
+| Workflow guard (branch/commit) | No | No | Yes |
+| Branch protection (Edit/Write) | No | No | Yes |
+| Secret scanning on commit | No | No | Yes |
+| Stop verification prompt | No | No | Yes |
+| Native git hooks | No | No | Yes |
+| Session startup validation | No | No | Yes |
 
-| File          | Lines | Scope                            |
-| ------------- | ----- | -------------------------------- |
-| `security.md` | ~15   | Injection, auth, LGPD, XSS       |
-| `backend.md`  | ~12   | TypeScript, NestJS, Python, DB   |
-| `frontend.md` | ~11   | React, Next.js, state management |
-| `infra.md`    | ~11   | Docker, Terraform, AWS           |
-| `quality.md`  | ~13   | Testing, git, API, observability |
+## Plugin Skills
 
-**Total startup cost: ~2,600 tokens** — leaves 197,000+ tokens for actual work.
-
-### Tier 2: Standards (on-demand, detailed)
-
-Files in `docs/standards/` contain **full patterns with code examples**. Claude reads them when working on specific tech:
-
-| File               | Covers                                                  |
-| ------------------ | ------------------------------------------------------- |
-| `typescript.md`    | Strict mode, Zod, error classes, discriminated unions   |
-| `nestjs.md`        | Hexagonal arch, Controllers, DTOs, Guards, Interceptors |
-| `react-nextjs.md`  | Hooks, TanStack Query, Zustand, Server Components       |
-| `python.md`        | Type hints, Pydantic v2, async, structlog, FastAPI      |
-| `docker.md`        | Multi-stage builds, compose, non-root, healthchecks     |
-| `terraform.md`     | Module structure, remote state, tagging, workspaces     |
-| `aws.md`           | IAM, S3, VPC, Secrets Manager, CloudWatch               |
-| `database.md`      | TypeORM, Prisma, SQLAlchemy, Redis cache-aside          |
-| `llm-ai.md`        | Prompts, RAG, embeddings, guardrails, evals             |
-| `observability.md` | pino, structlog, OpenTelemetry, RED metrics             |
-| `api-design.md`    | REST, pagination, errors, rate limiting, idempotency    |
-| `testing.md`       | Vitest, pytest, mocking, testcontainers, Playwright     |
-
-## Available Skills & Commands
-
-### Commands (stable)
-
-| Command             | Description                                                |
-| ------------------- | ---------------------------------------------------------- |
-| `/create-pr [base]` | Analyze diff, generate PR with title/description/test plan |
-| `/test <path>`      | Generate tests (happy/edge/error), run and report coverage |
-
-### Skills (advanced features)
-
-| Skill                 | Model  | Features     | Description                                     |
-| --------------------- | ------ | ------------ | ----------------------------------------------- |
-| `/review-security`    | Opus   | context:fork | OWASP-based security review                     |
-| `/fix-issue <number>` | Opus   | —            | Read GitHub issue, implement fix, add tests     |
-| `/refactor <path>`    | Sonnet | context:fork | Refactor preserving behavior, verify with tests |
-| `/deploy-check`       | Sonnet | —            | Pre-deployment verification checklist           |
-
-## Specialized Agents
-
-| Agent              | Purpose                                                           |
-| ------------------ | ----------------------------------------------------------------- |
-| `code-reviewer`    | Reviews `git diff` against rules and standards                    |
-| `ecommerce-expert` | Dafiti domain expert: catalog, cart, payments (PIX, Boleto), LGPD |
-| `infra-reviewer`   | Terraform, Docker security, AWS cost optimization                 |
+| Skill | Description |
+| --- | --- |
+| `/vibe:setup` | Interactive configuration wizard |
+| `/vibe:review-security` | OWASP-based security review |
+| `/vibe:deploy-check` | Pre-deployment verification checklist |
+| `/vibe:fix-issue <number>` | Fix GitHub issue with tests |
+| `/vibe:refactor <path>` | Refactor preserving behavior |
+| `/vibe:create-pr [base]` | Structured PR creation |
+| `/vibe:test <path>` | Generate and run tests |
+| `/vibe:health-check` | Validate plugin configuration |
+| `/vibe:whats-new` | Check Claude Code updates |
 
 ## Hooks
 
-| Hook                          | Trigger         | Action                                                                                    |
-| ----------------------------- | --------------- | ----------------------------------------------------------------------------------------- |
-| `block-dangerous-commands.sh` | Pre-Bash        | Blocks `rm -rf /`, `DROP TABLE`, force push to main, `chmod 777`, etc.                    |
-| `workflow-guard.sh`           | Pre-Bash        | Blocks commit on main, `--no-verify`, bad branch names, non-conventional commits, secrets |
-| `branch-guard.sh`             | Pre-Edit/Write  | Blocks file modifications on main/master/develop                                          |
-| `post-edit-lint.sh`           | Post-Edit/Write | Auto-formats: Prettier (JS/TS), ruff (Python), `terraform fmt` (.tf)                      |
-| `git-hooks/pre-commit`        | Native git      | Branch protection + secret detection for all git clients                                  |
-| `git-hooks/commit-msg`        | Native git      | Conventional commit validation for all git clients                                        |
-| Stop prompt                   | On stop         | Verifies tests passed, no security issues, conventions followed                           |
+| Hook | Trigger | Action |
+| --- | --- | --- |
+| `block-dangerous-commands.sh` | Pre-Bash | Blocks `rm -rf /`, `DROP TABLE`, force push, `chmod 777` |
+| `workflow-guard.sh` | Pre-Bash | Blocks commit on main, `--no-verify`, bad branches, secrets |
+| `branch-guard.sh` | Pre-Edit/Write | Blocks file modifications on protected branches |
+| `post-edit-lint.sh` | Post-Edit/Write | Auto-formats: Prettier (JS/TS), ruff (Python), `terraform fmt` |
+| `validate-config.sh` | SessionStart | Lightweight config validation at session start |
+| Stop prompt | On stop | Verifies tests, security, conventions |
+| `git-hooks/pre-commit` | Native git | Branch protection + secret detection |
+| `git-hooks/commit-msg` | Native git | Conventional commit validation |
 
-## MCP Servers
+## Specialized Agents
 
-| Server              | Purpose                                   | API Key        |
-| ------------------- | ----------------------------------------- | -------------- |
-| GitHub              | Repo management, issues, PRs              | `GITHUB_TOKEN` |
-| Context7            | Up-to-date library documentation          | None needed    |
-| Sequential Thinking | Structured reasoning for complex problems | None needed    |
+| Agent | Purpose |
+| --- | --- |
+| `code-reviewer` | Reviews `git diff` against rules and standards |
+| `ecommerce-expert` | Dafiti domain: catalog, cart, payments (PIX, Boleto), LGPD |
+| `infra-reviewer` | Terraform, Docker security, AWS cost optimization |
+
+## Two-Tier Architecture
+
+### Tier 1: Rules (always loaded, ~150 lines)
+
+Files in `.claude/rules/` — lean "Always/Never" directives. Total startup cost: ~2,600 tokens.
+
+### Tier 2: Standards (on-demand, detailed)
+
+Files in `docs/standards/` — full patterns with code examples. Claude reads them when working on specific tech.
+
+## Health Check (3 layers of resilience)
+
+1. **CI/CD** — `validate-plugin.yml` validates JSON, frontmatter, scripts on every push + weekly version check
+2. **On-demand** — `/vibe:health-check` validates all components with detailed report
+3. **Session startup** — `validate-config.sh` runs at session start (<100ms, non-blocking)
 
 ## GitHub Automation
 
-### Workflows
-
-- **claude-pr-review.yml** — Automatic code review on PR open/sync and @claude mentions
+- **claude-pr-review.yml** — Automatic code review on PR open/sync
 - **claude-security-review.yml** — Security scan on every PR
-- **claude-issue-handler.yml** — Handles @claude mentions + labels (`claude-fix`, `claude-feature`, `claude-refactor`)
+- **claude-issue-handler.yml** — Handles labels (`claude-fix`, `claude-feature`, `claude-refactor`)
+- **validate-plugin.yml** — Plugin structure validation + version tracking
 
-### Setup
+Add `CLAUDE_CODE_OAUTH_TOKEN` to repo secrets (from `claude setup-token`).
 
-Add `CLAUDE_CODE_OAUTH_TOKEN` to your GitHub repo secrets (from `claude setup-token`):
+## For Admins
+
+### Enterprise Lockdown
+
+Deploy `managed-settings.json` to restrict to Dafiti marketplace only:
+
+**macOS**: `/Library/Application Support/ClaudeCode/managed-settings.json`
+**Linux**: `/etc/claude-code/managed-settings.json`
+
+```json
+{
+  "strictKnownMarketplaces": [
+    {
+      "source": "github",
+      "repo": "dafiti-group/vibe"
+    }
+  ]
+}
+```
+
+### Auth Requirement
+
+Each developer needs `GITHUB_TOKEN` or `gh auth login` for the private marketplace.
+
+## Plugin Architecture
 
 ```
-Settings → Secrets and variables → Actions → New repository secret
-Name: CLAUDE_CODE_OAUTH_TOKEN
+vibe/
+├── .claude-plugin/          # Plugin manifest + marketplace
+├── skills/                  # 9 skills (setup, review-security, etc.)
+├── agents/                  # 3 specialized agents
+├── hooks/                   # Hook scripts + hooks.json config
+├── docs/standards/          # 12 detailed standard files
+├── .claude/rules/           # 5 lean rule files
+├── .github/workflows/       # 4 CI/CD workflows
+├── settings.json            # Plugin-level default permissions
+├── CLAUDE.md                # Main configuration hub
+├── REVIEW.md                # Code review guidelines
+└── .claude-code-version     # Version tracker
 ```
-
-## Context Management Tips
-
-- **`/compact`** — Run proactively during long sessions to compress context
-- **`/clear`** — Use between unrelated tasks to start fresh
-- **`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=90`** — Set in shell profile to auto-compact at 90% context usage
-- **Subdirectory CLAUDE.md** — For monorepos, create a `CLAUDE.md` in each service directory with service-specific instructions
-
-### Built-in Skills Reference
-
-- `/batch` — Process multiple files with the same operation
-- `/simplify` — Review changed code for reuse, quality, and efficiency
-
-## Using with Other AI Tools
-
-The `docs/standards/` files are pure markdown, reusable by any AI coding tool:
-
-- **Cursor** — Add `docs/standards/` to your `.cursorrules` or reference in `.cursor/rules/`
-- **GitHub Copilot** — Reference standards in `.github/copilot-instructions.md`
-- **Windsurf** — Add to `.windsurfrules`
-- **Codex** — Reference in `AGENTS.md`
-- **Antigravity** — Reference in project configuration
-
-## Tech Stack
-
-| Layer         | Technologies                                               |
-| ------------- | ---------------------------------------------------------- |
-| Backend       | TypeScript, NestJS, Python, FastAPI                        |
-| Frontend      | React, Next.js (App Router), TanStack Query, Zustand       |
-| Data/ML       | Python, Pydantic, LangChain                                |
-| Infra         | Docker, Terraform, AWS (S3, IAM, VPC, ECS), CloudFormation |
-| Testing       | Vitest, Jest, pytest, Playwright                           |
-| Observability | pino, structlog, OpenTelemetry                             |
 
 ## License
 
