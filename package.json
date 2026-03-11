@@ -16,7 +16,9 @@
     "test:git-hooks": "bats tests/commit-msg.bats",
     "test:structure": "bats tests/plugin-structure.bats",
     "test:secrets": "bats tests/secret-patterns.bats",
-    "build": "echo \"Configure build: tsc or next build\" && exit 0"
+    "build": "echo \"Configure build: tsc or next build\" && exit 0",
+    "docs:dev": "cd docs && npm run dev",
+    "docs:build": "cd docs && npm run build"
   },
   "devDependencies": {
     "eslint": "^9.0.0",

@@ -15,6 +15,19 @@ updates:
       formatting:
         patterns: ["prettier*"]
 
+  - package-ecosystem: "npm"
+    directory: "/docs"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    labels: ["chore", "dependencies"]
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      starlight:
+        patterns: ["astro*", "@astrojs/*"]
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
