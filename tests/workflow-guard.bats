@@ -256,7 +256,7 @@ run_hook() {
   grep -q 'pr checks' "$HOOK"
 }
 
-@test "allows: gh pr merge (no PR number, passthrough)" {
+@test "allows: non-merge gh pr commands" {
   result=$(run_hook "gh pr list")
   [[ -z "$result" ]]
 }

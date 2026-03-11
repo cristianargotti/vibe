@@ -73,19 +73,21 @@ fi
 
 # --- 5. Block PR merge if CI checks haven't passed ---
 if echo "$COMMAND" | grep -qE 'gh[[:space:]]+pr[[:space:]]+merge'; then
-  # Extract PR number from command
-  PR_NUM=$(echo "$COMMAND" | grep -oE 'gh[[:space:]]+pr[[:space:]]+merge[[:space:]]+[0-9]+' | awk '{print $NF}')
+  # Extract PR number: try after merge, or any number in the command
+  PR_NUM=$(echo "$COMMAND" | grep -oE '[0-9]+' | head -1)
+  # Fallback: detect current branch's PR if no number given
+  if [ -z "$PR_NUM" ] && command -v gh &>/dev/null; then
+    PR_NUM=$(gh pr view --json number -q .number 2>/dev/null || echo "")
+  fi
   if [ -n "$PR_NUM" ]; then
-    # Query check status via gh (requires gh to be available)
     if command -v gh &>/dev/null; then
       CHECKS_OUTPUT=$(gh pr checks "$PR_NUM" 2>/dev/null || true)
       if [ -n "$CHECKS_OUTPUT" ]; then
-        # If any check is still pending or in_progress, block merge
-        if echo "$CHECKS_OUTPUT" | grep -qiE '(pending|in_progress)'; then
+        # gh pr checks uses: pass, fail, pending, skipping
+        if echo "$CHECKS_OUTPUT" | grep -qi 'pending'; then
           deny "Blocked: PR #${PR_NUM} has pending CI checks. Wait for all checks to complete before merging."
         fi
-        # If any check failed, block merge
-        if echo "$CHECKS_OUTPUT" | grep -qiE 'fail'; then
+        if echo "$CHECKS_OUTPUT" | grep -qE '\bfail\b'; then
           deny "Blocked: PR #${PR_NUM} has failing CI checks. Fix the failures before merging."
         fi
       fi
