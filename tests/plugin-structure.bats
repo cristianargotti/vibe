@@ -159,14 +159,14 @@
   [[ "$count" -gt 0 ]]
 }
 
-@test "hooks.json Stop hook has matcher field" {
-  result=$(jq -r '.hooks.Stop[0].matcher' hooks/hooks.json)
-  [[ "$result" == "" ]]
+@test "hooks.json Stop hook has no matcher field" {
+  result=$(jq '.hooks.Stop[0] | has("matcher")' hooks/hooks.json)
+  [[ "$result" == "false" ]]
 }
 
-@test "hooks.json SessionStart hook has matcher field" {
-  result=$(jq -r '.hooks.SessionStart[0].matcher' hooks/hooks.json)
-  [[ "$result" == "" ]]
+@test "hooks.json SessionStart hook has no matcher field" {
+  result=$(jq '.hooks.SessionStart[0] | has("matcher")' hooks/hooks.json)
+  [[ "$result" == "false" ]]
 }
 
 # --- Settings ---
@@ -186,9 +186,9 @@
   [[ "$result" == "true" ]]
 }
 
-@test ".claude/settings.json Stop hook has matcher field" {
-  result=$(jq -r '.hooks.Stop[0].matcher' .claude/settings.json)
-  [[ "$result" == "" ]]
+@test ".claude/settings.json Stop hook has no matcher field" {
+  result=$(jq '.hooks.Stop[0] | has("matcher")' .claude/settings.json)
+  [[ "$result" == "false" ]]
 }
 
 # --- Skills have vibe: prefix in permissions ---
