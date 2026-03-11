@@ -1,5 +1,5 @@
 {
-  "plugin": "2.1.0",
+  "plugin": "2.2.0",
   "claudeCode": "2.1.72",
   "mcp": {
     "github": "ghcr.io/github/github-mcp-server:latest",

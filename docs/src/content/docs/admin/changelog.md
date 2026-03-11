@@ -4,6 +4,15 @@ sidebar:
   order: 2
 ---
 
+## v2.2.0
+
+- Added Starlight documentation site (42 pages) at `docs/`
+- Prebuild script copies standards with Starlight frontmatter (no content duplication)
+- GitHub Pages deploy workflow (`deploy-docs.yml`)
+- Dependabot tracking for docs dependencies
+- Documentation: getting-started, skills, hooks, automation, configuration, guides, admin sections
+- Full-text search via Pagefind
+
 ## v2.1.0
 
 - Added secret detection in workflow guard (30+ patterns from `secret-patterns.txt`)
