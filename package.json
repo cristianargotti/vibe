@@ -21,7 +21,7 @@
     "docs:build": "cd docs && npm run build"
   },
   "devDependencies": {
-    "eslint": "^9.0.0",
+    "eslint": "^10.0.3",
     "prettier": "^3.4.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0"
