@@ -9,7 +9,7 @@
       "name": "vibe",
       "source": {
         "source": "github",
-        "repo": "dafiti-group/vibe"
+        "repo": "cristianargotti/vibe"
       },
       "description": "Dafiti engineering standards — security, architecture, and quality guards"
     }
