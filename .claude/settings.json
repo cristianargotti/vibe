@@ -54,12 +54,15 @@
       "Bash(git merge *)",
       "Bash(git push *)",
       "Bash(docker run *)",
-      "Skill(review-security)",
-      "Skill(fix-issue *)",
-      "Skill(create-pr *)",
-      "Skill(refactor *)",
-      "Skill(test *)",
-      "Skill(deploy-check)",
+      "Skill(vibe:review-security)",
+      "Skill(vibe:fix-issue *)",
+      "Skill(vibe:create-pr *)",
+      "Skill(vibe:refactor *)",
+      "Skill(vibe:test *)",
+      "Skill(vibe:deploy-check)",
+      "Skill(vibe:setup)",
+      "Skill(vibe:health-check)",
+      "Skill(vibe:whats-new)",
       "Skill(simplify)"
     ],
     "deny": [
@@ -73,5 +76,56 @@
       "Bash(wget *)"
     ],
     "ask": ["Bash(terraform apply *)", "Bash(terraform destroy *)"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/block-dangerous-commands.sh",
+            "statusMessage": "Checking command safety..."
+          },
+          {
+            "type": "command",
+            "command": "hooks/workflow-guard.sh",
+            "statusMessage": "Validating workflow..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/branch-guard.sh",
+            "statusMessage": "Checking branch protection..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/post-edit-lint.sh",
+            "statusMessage": "Auto-formatting..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before finishing, verify: 1) All tests pass 2) No security issues introduced 3) Code follows project conventions in .claude/rules/ 4) No secrets or PII exposed"
+          }
+        ]
+      }
+    ]
   }
 }

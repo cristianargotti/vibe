@@ -1,5 +1,5 @@
 {
-  "_comment": "Template — include only selected integrations",
+  "_comment": "Base MCP config — include only selected integrations",
   "mcpServers": {
     "github": {
       "command": "npx",

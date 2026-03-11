@@ -1,7 +1,7 @@
 {
   "name": "vibe",
   "version": "2.0.0",
-  "description": "Claude Code configuration template for Dafiti engineering teams",
+  "description": "Claude Code plugin — Dafiti engineering standards",
   "private": true,
   "engines": {
     "node": ">=18"

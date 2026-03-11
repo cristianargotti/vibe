@@ -53,7 +53,17 @@
       "Bash(git checkout *)",
       "Bash(git merge *)",
       "Bash(git push *)",
-      "Bash(docker run *)"
+      "Bash(docker run *)",
+      "Skill(vibe:review-security)",
+      "Skill(vibe:fix-issue *)",
+      "Skill(vibe:create-pr *)",
+      "Skill(vibe:refactor *)",
+      "Skill(vibe:test *)",
+      "Skill(vibe:deploy-check)",
+      "Skill(vibe:setup)",
+      "Skill(vibe:health-check)",
+      "Skill(vibe:whats-new)",
+      "Skill(simplify)"
     ],
     "deny": [
       "Read(.env*)",
@@ -65,9 +75,6 @@
       "Bash(curl *)",
       "Bash(wget *)"
     ],
-    "ask": [
-      "Bash(terraform apply *)",
-      "Bash(terraform destroy *)"
-    ]
+    "ask": ["Bash(terraform apply *)", "Bash(terraform destroy *)"]
   }
 }
