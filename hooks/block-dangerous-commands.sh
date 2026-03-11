@@ -38,7 +38,7 @@ check_pattern 'TRUNCATE[[:space:]]+TABLE' "Blocked: TRUNCATE requires manual exe
 check_pattern 'DELETE[[:space:]]+FROM[[:space:]]+[^[:space:]]+[[:space:]]*;?[[:space:]]*$' "Blocked: DELETE without WHERE clause is dangerous"
 
 # Git destructive operations on main
-check_pattern 'git[[:space:]]+push[[:space:]]+.*--force' "Blocked: force push requires explicit user approval"
+check_pattern 'git[[:space:]]+push[[:space:]]+.*--force($|[[:space:]])' "Blocked: force push requires explicit user approval"
 check_pattern 'git[[:space:]]+push[[:space:]]+-f[[:space:]]' "Blocked: force push requires explicit user approval"
 check_pattern 'git[[:space:]]+push[[:space:]]+[^[:space:]]+[[:space:]]+\+' "Blocked: force push via + refspec requires explicit user approval"
 check_pattern 'git[[:space:]]+branch[[:space:]]+-D[[:space:]]+(main|master)' "Blocked: deleting main/master branch is not allowed"

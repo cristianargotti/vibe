@@ -22,22 +22,21 @@ format_file() {
   case "$EXT" in
     ts|tsx|js|jsx|json|md|yml|yaml|css|scss)
       if command -v npx &>/dev/null; then
-        npx --yes prettier --write "$FILE_PATH" 2>/dev/null &
+        npx --yes prettier --write "$FILE_PATH" 2>/dev/null || true
       fi
       ;;
     py)
       if command -v ruff &>/dev/null; then
-        ruff format "$FILE_PATH" 2>/dev/null && ruff check --fix "$FILE_PATH" 2>/dev/null &
+        ruff format "$FILE_PATH" 2>/dev/null || true
+        ruff check --fix "$FILE_PATH" 2>/dev/null || true
       fi
       ;;
     tf|tfvars)
       if command -v terraform &>/dev/null; then
-        terraform fmt "$FILE_PATH" 2>/dev/null &
+        terraform fmt "$FILE_PATH" 2>/dev/null || true
       fi
       ;;
   esac
 }
 
-# Run formatting in background to avoid blocking
-format_file &
-wait
+format_file

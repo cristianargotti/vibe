@@ -78,6 +78,16 @@ run_hook() {
   [[ -z "$result" ]]
 }
 
+@test "allows: git push --force-with-lease (safe force push)" {
+  result=$(run_hook "git push --force-with-lease origin feat/my-branch")
+  [[ -z "$result" ]]
+}
+
+@test "allows: git push --force-if-includes" {
+  result=$(run_hook "git push --force-if-includes origin feat/my-branch")
+  [[ -z "$result" ]]
+}
+
 # --- DENY: destructive filesystem ---
 
 @test "blocks: rm -rf /" {
