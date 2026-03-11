@@ -38,46 +38,43 @@
   [[ "$result" == "vibe" ]]
 }
 
-@test "plugin.json has version" {
-  result=$(jq -r '.version' .claude-plugin/plugin.json)
-  [[ "$result" != "null" ]]
-  [[ "$result" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+@test "plugin.json has only name, description, author (auto-discovery)" {
+  keys=$(jq -r 'keys[]' .claude-plugin/plugin.json | sort | tr '\n' ',')
+  [[ "$keys" == "author,description,name," ]]
 }
 
-@test "plugin.json lists 9 skills" {
-  count=$(jq '.skills | length' .claude-plugin/plugin.json)
+# --- Auto-discovered skills exist ---
+
+@test "9 skill directories exist with SKILL.md" {
+  count=0
+  for skill_dir in skills/*/; do
+    [[ -f "$skill_dir/SKILL.md" ]] && ((count++))
+  done
   [[ "$count" -eq 9 ]]
 }
 
-@test "plugin.json lists 3 agents" {
-  count=$(jq '.agents | length' .claude-plugin/plugin.json)
+# --- Auto-discovered agents exist ---
+
+@test "3 agent files exist" {
+  count=$(ls -1 agents/*.md 2>/dev/null | wc -l | tr -d ' ')
   [[ "$count" -eq 3 ]]
 }
 
-@test "plugin.json references hooks.json" {
-  result=$(jq -r '.hooks' .claude-plugin/plugin.json)
-  [[ "$result" == "hooks/hooks.json" ]]
-}
+# --- Skills frontmatter has no deprecated fields ---
 
-@test "plugin.json references settings.json" {
-  result=$(jq -r '.settings' .claude-plugin/plugin.json)
-  [[ "$result" == "settings.json" ]]
-}
-
-# --- All referenced skills exist ---
-
-@test "all skill directories in plugin.json exist" {
-  jq -r '.skills[]' .claude-plugin/plugin.json | while read -r skill_path; do
-    [[ -d "$skill_path" ]] || { echo "MISSING: $skill_path"; false; }
-    [[ -f "$skill_path/SKILL.md" ]] || { echo "MISSING: $skill_path/SKILL.md"; false; }
+@test "no SKILL.md uses deprecated model field" {
+  for skill_dir in skills/*/; do
+    skill_file="${skill_dir}SKILL.md"
+    [[ -f "$skill_file" ]] || continue
+    ! grep -q "^model:" "$skill_file" || { echo "DEPRECATED model: in $skill_file"; false; }
   done
 }
 
-# --- All referenced agents exist ---
-
-@test "all agent files in plugin.json exist" {
-  jq -r '.agents[]' .claude-plugin/plugin.json | while read -r agent_path; do
-    [[ -f "$agent_path" ]] || { echo "MISSING: $agent_path"; false; }
+@test "no SKILL.md uses deprecated context field" {
+  for skill_dir in skills/*/; do
+    skill_file="${skill_dir}SKILL.md"
+    [[ -f "$skill_file" ]] || continue
+    ! grep -q "^context:" "$skill_file" || { echo "DEPRECATED context: in $skill_file"; false; }
   done
 }
 
@@ -245,9 +242,9 @@
   [[ "$result" == "vibe" ]]
 }
 
-@test "marketplace.json references dafiti-group/vibe repo" {
+@test "marketplace.json references cristianargotti/vibe repo" {
   result=$(jq -r '.plugins[0].source.repo' .claude-plugin/marketplace.json)
-  [[ "$result" == "dafiti-group/vibe" ]]
+  [[ "$result" == "cristianargotti/vibe" ]]
 }
 
 # --- Version Tracker ---

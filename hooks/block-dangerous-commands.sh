@@ -29,13 +29,19 @@ check_pattern() {
 check_pattern 'rm[[:space:]]+(-[a-zA-Z]*f[a-zA-Z]*[[:space:]]+)?/' "Blocked: recursive delete on root/system paths is not allowed"
 check_pattern 'rm[[:space:]]+-[a-zA-Z]*(rf|fr)[a-zA-Z]*[[:space:]]' "Blocked: rm -rf requires explicit user approval"
 check_pattern 'rm[[:space:]]+-r[[:space:]]+-f[[:space:]]' "Blocked: rm -r -f requires explicit user approval"
+check_pattern 'rm[[:space:]]+-[a-zA-Z]*(rf|fr)[a-zA-Z]*[[:space:]]+[~.*]' "Blocked: rm -rf on home/current/wildcard paths is not allowed"
 check_pattern 'chmod[[:space:]]+777' "Blocked: chmod 777 is a security risk — use specific permissions"
 check_pattern 'chown[[:space:]]+-R[[:space:]]+root' "Blocked: recursive chown to root is dangerous"
 
 # Database destruction
 check_pattern 'DROP[[:space:]]+(TABLE|DATABASE|SCHEMA)' "Blocked: DROP operations require manual execution"
 check_pattern 'TRUNCATE[[:space:]]+TABLE' "Blocked: TRUNCATE requires manual execution"
-check_pattern 'DELETE[[:space:]]+FROM[[:space:]]+[^[:space:]]+[[:space:]]*;?[[:space:]]*$' "Blocked: DELETE without WHERE clause is dangerous"
+# DELETE without WHERE — match DELETE FROM and verify no WHERE follows
+if echo "$COMMAND" | grep -qiE 'DELETE[[:space:]]+FROM[[:space:]]'; then
+  if ! echo "$COMMAND" | grep -qiE 'DELETE[[:space:]]+FROM[[:space:]]+[^;]*WHERE'; then
+    check_pattern 'DELETE[[:space:]]+FROM' "Blocked: DELETE without WHERE clause is dangerous"
+  fi
+fi
 
 # Git destructive operations on main
 check_pattern 'git[[:space:]]+push[[:space:]]+.*--force($|[[:space:]])' "Blocked: force push requires explicit user approval"

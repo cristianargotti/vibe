@@ -2,8 +2,6 @@
 name: refactor
 description: ALWAYS invoke when user types /refactor. Refactors code while preserving behavior, verified by tests.
 argument-hint: "<path>"
-model: sonnet
-context: fork
 allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 ---
 

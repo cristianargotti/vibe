@@ -1,7 +1,6 @@
 ---
 name: deploy-check
 description: ALWAYS invoke when user types /deploy-check. Runs pre-deployment verification checklist.
-model: sonnet
 ---
 
 # Pre-Deployment Check
