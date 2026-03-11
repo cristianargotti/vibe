@@ -24,6 +24,37 @@ HOOK="hooks/branch-guard.sh"
   [[ -z "$result" ]]
 }
 
-# Note: Testing "deny on main" requires actually being on main,
-# which we don't want to do in automated tests. These are covered
-# by the integration test (test-on-protected-branch.bats).
+# --- Protected branch tests (mock git rev-parse) ---
+
+@test "blocks: file edit on main branch (mocked)" {
+  MOCKDIR=$(mktemp -d)
+  cat > "$MOCKDIR/git" << 'MOCKEOF'
+#!/usr/bin/env bash
+if [[ "$1" == "rev-parse" && "$2" == "--abbrev-ref" ]]; then
+  echo "main"
+  exit 0
+fi
+exec /usr/bin/git "$@"
+MOCKEOF
+  chmod +x "$MOCKDIR/git"
+  result=$(echo '{"tool_input":{"file_path":"test.ts","new_string":"hello"}}' | PATH="$MOCKDIR:$PATH" bash "$HOOK")
+  rm -f "$MOCKDIR/git" && rmdir "$MOCKDIR"
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
+  [[ "$result" == *"cannot modify files"* ]]
+}
+
+@test "blocks: file edit on develop branch (mocked)" {
+  MOCKDIR=$(mktemp -d)
+  cat > "$MOCKDIR/git" << 'MOCKEOF'
+#!/usr/bin/env bash
+if [[ "$1" == "rev-parse" && "$2" == "--abbrev-ref" ]]; then
+  echo "develop"
+  exit 0
+fi
+exec /usr/bin/git "$@"
+MOCKEOF
+  chmod +x "$MOCKDIR/git"
+  result=$(echo '{"tool_input":{"file_path":"test.ts","new_string":"hello"}}' | PATH="$MOCKDIR:$PATH" bash "$HOOK")
+  rm -f "$MOCKDIR/git" && rmdir "$MOCKDIR"
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
+}

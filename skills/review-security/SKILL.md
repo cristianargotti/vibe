@@ -1,8 +1,6 @@
 ---
 name: review-security
 description: ALWAYS invoke when user types /review-security. Performs OWASP-based security review of the codebase.
-model: opus
-context: fork
 allowed-tools: Read, Grep, Glob
 ---
 

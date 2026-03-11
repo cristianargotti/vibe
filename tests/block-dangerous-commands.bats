@@ -120,6 +120,21 @@ run_hook() {
   [[ "$result" == *'"permissionDecision":"deny"'* ]]
 }
 
+@test "blocks: rm -rf ~" {
+  result=$(run_hook "rm -rf ~")
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
+}
+
+@test "blocks: rm -rf ." {
+  result=$(run_hook "rm -rf .")
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
+}
+
+@test "blocks: rm -rf *" {
+  result=$(run_hook "rm -rf *")
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
+}
+
 @test "blocks: chmod 777" {
   result=$(run_hook "chmod 777 /tmp/file")
   [[ "$result" == *'"permissionDecision":"deny"'* ]]
@@ -155,6 +170,21 @@ run_hook() {
 @test "blocks: DELETE FROM without WHERE" {
   result=$(run_hook "psql -c 'DELETE FROM users;'")
   [[ "$result" == *'"permissionDecision":"deny"'* ]]
+}
+
+@test "blocks: DELETE FROM without WHERE (no semicolon)" {
+  result=$(run_hook "psql -c 'DELETE FROM users'")
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
+}
+
+@test "blocks: DELETE FROM without WHERE (no space before semicolon)" {
+  result=$(run_hook "psql -c 'DELETE FROM orders;'")
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
+}
+
+@test "allows: DELETE FROM with WHERE" {
+  result=$(run_hook "psql -c 'DELETE FROM users WHERE id = 1;'")
+  [[ -z "$result" ]]
 }
 
 # --- DENY: git destructive operations ---

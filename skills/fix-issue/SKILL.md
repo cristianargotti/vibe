@@ -2,7 +2,6 @@
 name: fix-issue
 description: ALWAYS invoke when user types /fix-issue. Reads a GitHub issue and implements the fix with tests.
 argument-hint: "<issue-number>"
-model: opus
 ---
 
 # Fix GitHub Issue

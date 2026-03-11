@@ -1,29 +1,8 @@
 {
   "name": "vibe",
-  "version": "2.2.0",
   "description": "Dafiti engineering standards — security, architecture, and quality guards for Claude Code",
   "author": {
     "name": "AI Core Team — Dafiti",
     "email": "ai-core@dafiti.com"
-  },
-  "homepage": "https://github.com/cristianargotti/vibe",
-  "license": "MIT",
-  "skills": [
-    "skills/setup",
-    "skills/review-security",
-    "skills/deploy-check",
-    "skills/fix-issue",
-    "skills/refactor",
-    "skills/create-pr",
-    "skills/test",
-    "skills/health-check",
-    "skills/whats-new"
-  ],
-  "agents": [
-    "agents/code-reviewer.md",
-    "agents/ecommerce-expert.md",
-    "agents/infra-reviewer.md"
-  ],
-  "hooks": "hooks/hooks.json",
-  "settings": "settings.json"
+  }
 }

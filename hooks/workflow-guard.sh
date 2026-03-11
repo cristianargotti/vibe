@@ -38,12 +38,21 @@ if echo "$COMMAND" | grep -qE 'git[[:space:]]+(checkout[[:space:]]+-b|switch[[:s
   if [ -n "$BRANCH_NAME" ] && ! echo "$BRANCH_NAME" | grep -qE '^(feat|fix|chore|docs|test|refactor)/'; then
     deny "Blocked: branch '${BRANCH_NAME}' must start with feat/, fix/, chore/, docs/, test/, or refactor/"
   fi
-  # Check if current branch is behind its remote (no network, uses last fetch)
+  # Fetch origin/main and verify branch base is fresh
+  if git remote | grep -q origin; then
+    git fetch origin main --quiet 2>/dev/null || true
+  fi
   CURRENT=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
   if [ -n "$CURRENT" ]; then
+    # Check if current branch is behind its own remote
     BEHIND=$(git rev-list HEAD..@{u} --count 2>/dev/null || echo "0")
     if [ "$BEHIND" -gt 0 ]; then
       deny "Blocked: '${CURRENT}' is ${BEHIND} commit(s) behind remote. Run 'git pull' before creating a new branch."
+    fi
+    # Check if current branch is behind origin/main
+    BEHIND_MAIN=$(git rev-list HEAD..origin/main --count 2>/dev/null || echo "0")
+    if [ "$BEHIND_MAIN" -gt 0 ]; then
+      deny "Blocked: '${CURRENT}' is ${BEHIND_MAIN} commit(s) behind origin/main. Switch to main and pull first: git checkout main && git pull origin main"
     fi
   fi
 fi
