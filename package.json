@@ -1,6 +1,6 @@
 {
   "name": "vibe",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Claude Code plugin — Dafiti engineering standards",
   "private": true,
   "engines": {
