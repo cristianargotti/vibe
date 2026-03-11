@@ -1,13 +1,22 @@
 {
   "name": "vibe",
-  "version": "1.0.0",
-  "description": "Claude Code configuration template for Dafiti engineering teams",
+  "version": "2.1.0",
+  "description": "Claude Code plugin — Dafiti engineering standards",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}'",
-    "format:check": "prettier --check '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}'"
+    "format:check": "prettier --check '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}'",
+    "test": "bats tests/",
+    "test:hooks": "bats tests/block-dangerous-commands.bats tests/workflow-guard.bats tests/branch-guard.bats tests/post-edit-lint.bats tests/validate-config.bats",
+    "test:git-hooks": "bats tests/commit-msg.bats",
+    "test:structure": "bats tests/plugin-structure.bats",
+    "test:secrets": "bats tests/secret-patterns.bats",
+    "build": "echo \"Configure build: tsc or next build\" && exit 0"
   },
   "devDependencies": {
     "eslint": "^9.0.0",

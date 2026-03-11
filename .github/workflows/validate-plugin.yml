@@ -1,0 +1,135 @@
+name: Validate Vibe Plugin
+
+on:
+  push:
+    paths:
+      - "skills/**"
+      - "hooks/**"
+      - "agents/**"
+      - ".claude-plugin/**"
+      - "settings.json"
+  pull_request:
+    paths:
+      - "skills/**"
+      - "hooks/**"
+      - "agents/**"
+      - ".claude-plugin/**"
+      - "settings.json"
+  schedule:
+    - cron: "0 9 * * 1" # Weekly Monday 9am UTC
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          echo "Validating JSON files..."
+          FAILED=0
+          for f in .claude-plugin/plugin.json .claude-plugin/marketplace.json hooks/hooks.json settings.json; do
+            if [ -f "$f" ]; then
+              if jq empty "$f" 2>/dev/null; then
+                echo "  PASS: $f"
+              else
+                echo "  FAIL: $f — invalid JSON"
+                FAILED=1
+              fi
+            else
+              echo "  FAIL: $f — not found"
+              FAILED=1
+            fi
+          done
+          [ "$FAILED" -eq 0 ] || exit 1
+
+      - name: Validate skill frontmatter
+        run: |
+          echo "Validating skill SKILL.md files..."
+          FAILED=0
+          for dir in skills/*/; do
+            skill=$(basename "$dir")
+            file="$dir/SKILL.md"
+            if [ -f "$file" ]; then
+              if head -1 "$file" | grep -q '^---'; then
+                echo "  PASS: $skill has frontmatter"
+              else
+                echo "  FAIL: $skill missing YAML frontmatter"
+                FAILED=1
+              fi
+            else
+              echo "  FAIL: $skill/SKILL.md not found"
+              FAILED=1
+            fi
+          done
+          [ "$FAILED" -eq 0 ] || exit 1
+
+      - name: Validate hook scripts
+        run: |
+          echo "Validating hook scripts..."
+          FAILED=0
+          for hook in hooks/*.sh; do
+            if [ -x "$hook" ]; then
+              echo "  PASS: $hook is executable"
+            else
+              echo "  FAIL: $hook is not executable"
+              FAILED=1
+            fi
+          done
+          [ "$FAILED" -eq 0 ] || exit 1
+
+      - name: Validate agent files
+        run: |
+          echo "Validating agent files..."
+          FAILED=0
+          for agent in agents/*.md; do
+            if [ -s "$agent" ]; then
+              echo "  PASS: $agent exists and is non-empty"
+            else
+              echo "  FAIL: $agent is empty or missing"
+              FAILED=1
+            fi
+          done
+          [ "$FAILED" -eq 0 ] || exit 1
+
+      - name: Check Claude Code version
+        if: github.event_name == 'schedule'
+        run: |
+          if [ -f "versions.json" ]; then
+            TRACKED=$(jq -r '.claudeCode' versions.json)
+          elif [ -f ".claude-code-version" ]; then
+            TRACKED=$(cat .claude-code-version | tr -d '[:space:]')
+          else
+            echo "::warning::No version tracking file found"
+            exit 0
+          fi
+          echo "Tracked version: $TRACKED"
+          # Check latest version from npm
+          LATEST=$(npm view @anthropic-ai/claude-code version 2>/dev/null || echo "unknown")
+          echo "Latest npm version: $LATEST"
+          if [ "$TRACKED" != "$LATEST" ] && [ "$LATEST" != "unknown" ]; then
+            echo "::warning::Claude Code version mismatch: tracked=$TRACKED latest=$LATEST"
+            echo "NEW_VERSION=$LATEST" >> $GITHUB_ENV
+          fi
+
+      - name: Create update issue
+        if: github.event_name == 'schedule' && env.NEW_VERSION != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'claude-update',
+              state: 'open'
+            });
+            if (existing.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `chore: update Claude Code version to ${process.env.NEW_VERSION}`,
+                body: `A new version of Claude Code is available.\n\n- Tracked: ${process.env.TRACKED || 'unknown'}\n- Latest: ${process.env.NEW_VERSION}\n\nRun \`/vibe:whats-new\` to check for breaking changes before updating.`,
+                labels: ['claude-update']
+              });
+            }

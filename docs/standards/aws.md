@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # AWS Standards
 
 Tier 2 reference for AWS service usage at Dafiti. All infrastructure follows least-privilege, encryption-at-rest, and cost-visibility principles.
@@ -125,7 +127,7 @@ module "vpc" {
   name = "${local.prefix}-vpc"
   cidr = "10.0.0.0/16"
 
-  azs             = ["us-east-1a", "us-east-1b"]
+  azs             = ["sa-east-1a", "sa-east-1b", "sa-east-1c"]
   public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
   private_subnets = ["10.0.10.0/24", "10.0.11.0/24"]
   database_subnets = ["10.0.20.0/24", "10.0.21.0/24"]
@@ -212,12 +214,17 @@ resource "aws_secretsmanager_secret_version" "db_credentials" {
 Application code reads secrets at startup:
 
 ```typescript
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from "@aws-sdk/client-secrets-manager";
 
 async function getDbConfig(): Promise<DbConfig> {
-  const client = new SecretsManagerClient({ region: 'us-east-1' });
+  const client = new SecretsManagerClient({ region: "us-east-1" });
   const response = await client.send(
-    new GetSecretValueCommand({ SecretId: `${serviceName}-${env}/db-credentials` }),
+    new GetSecretValueCommand({
+      SecretId: `${serviceName}-${env}/db-credentials`,
+    }),
   );
   return JSON.parse(response.SecretString!);
 }
@@ -367,5 +374,5 @@ resource "aws_lb_target_group" "app" {
 - Every IAM policy must follow least privilege — no `Action: "*"` or `Resource: "*"`.
 - All S3 buckets must block public access and enable encryption.
 - Production VPCs use one NAT gateway per AZ for resilience.
-- Secrets go in Secrets Manager, never in env vars or SSM plaintext.
+- Secrets go in Secrets Manager or injected as env vars via ECS/Kubernetes secret refs — never hardcoded or in SSM plaintext.
 - All resources must carry the four mandatory cost-allocation tags.

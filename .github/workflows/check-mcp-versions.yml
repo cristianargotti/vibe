@@ -1,0 +1,152 @@
+name: Check MCP Server Versions
+
+on:
+  schedule:
+    - cron: "0 10 * * 1" # Weekly Monday 10am UTC (after validate-plugin)
+  workflow_dispatch:
+
+jobs:
+  check-versions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check npm MCP package versions
+        id: npm-check
+        run: |
+          echo "Checking npm MCP server versions..."
+          DRIFT=""
+
+          # Read expected versions from versions.json
+          NPM_PACKAGES=$(jq -r '.mcp | to_entries[] | select(.value | startswith("@") or startswith("awslabs")) | "\(.key)=\(.value)"' versions.json)
+
+          while IFS='=' read -r name package; do
+            [ -z "$name" ] && continue
+            # Extract package name without @latest or version
+            PKG_NAME=$(echo "$package" | sed 's/@latest$//' | sed 's/@[0-9].*$//')
+            LATEST=$(npm view "$PKG_NAME" version 2>/dev/null || echo "unknown")
+            if [ "$LATEST" != "unknown" ]; then
+              echo "  $name ($PKG_NAME): latest=$LATEST"
+              # Check if .mcp.json uses pinned version instead of @latest
+              if grep -q "$PKG_NAME@[0-9]" .mcp.json 2>/dev/null; then
+                PINNED=$(grep -oE "${PKG_NAME}@[0-9][^\"]*" .mcp.json || true)
+                if [ -n "$PINNED" ]; then
+                  DRIFT="${DRIFT}- **$name**: pinned at \`$PINNED\`, latest is \`$LATEST\`\n"
+                fi
+              fi
+            fi
+          done <<< "$NPM_PACKAGES"
+
+          if [ -n "$DRIFT" ]; then
+            echo "drift=true" >> $GITHUB_OUTPUT
+            # Store drift details for issue creation
+            printf '%b' "$DRIFT" > /tmp/mcp-drift.txt
+          else
+            echo "drift=false" >> $GITHUB_OUTPUT
+            echo "All MCP servers are up to date."
+          fi
+
+      - name: Check Docker MCP image versions
+        id: docker-check
+        run: |
+          echo "Checking Docker MCP image versions..."
+          DRIFT=""
+
+          # Check GitHub MCP server Docker image
+          DOCKER_IMAGES=$(jq -r '.mcp | to_entries[] | select(.value | startswith("ghcr.io")) | "\(.key)=\(.value)"' versions.json)
+
+          while IFS='=' read -r name image; do
+            [ -z "$name" ] && continue
+            # Extract image without :tag
+            IMG=$(echo "$image" | cut -d: -f1)
+            echo "  $name: $IMG (using :latest tag)"
+          done <<< "$DOCKER_IMAGES"
+
+          # Check if .mcp.json still uses deprecated npx server-github
+          if grep -q "server-github" .mcp.json 2>/dev/null; then
+            DRIFT="${DRIFT}- **github**: still using deprecated \`@modelcontextprotocol/server-github\`, migrate to \`ghcr.io/github/github-mcp-server\`\n"
+          fi
+
+          if [ -n "$DRIFT" ]; then
+            echo "drift=true" >> $GITHUB_OUTPUT
+            printf '%b' "$DRIFT" >> /tmp/mcp-drift.txt
+          else
+            echo "drift=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check standards freshness
+        id: standards-check
+        run: |
+          echo "Checking standards file freshness..."
+          STALE=""
+          SIX_MONTHS_AGO=$(date -d '6 months ago' +%s 2>/dev/null || date -v-6m +%s 2>/dev/null || echo "0")
+
+          for f in docs/standards/*.md; do
+            [ -f "$f" ] || continue
+            # Check last-reviewed header
+            REVIEWED=$(grep -oE 'last-reviewed: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$f" | head -1 | cut -d' ' -f2)
+            if [ -n "$REVIEWED" ]; then
+              REVIEWED_TS=$(date -d "$REVIEWED" +%s 2>/dev/null || date -j -f "%Y-%m-%d" "$REVIEWED" +%s 2>/dev/null || echo "0")
+              if [ "$REVIEWED_TS" -lt "$SIX_MONTHS_AGO" ] 2>/dev/null; then
+                STALE="${STALE}- \`$(basename "$f")\`: last reviewed $REVIEWED (>6 months)\n"
+              fi
+            fi
+          done
+
+          if [ -n "$STALE" ]; then
+            echo "stale=true" >> $GITHUB_OUTPUT
+            printf '%b' "$STALE" > /tmp/stale-standards.txt
+          else
+            echo "stale=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create MCP update issue
+        if: steps.npm-check.outputs.drift == 'true' || steps.docker-check.outputs.drift == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'mcp-update',
+              state: 'open'
+            });
+            if (existing.data.length === 0) {
+              const drift = fs.existsSync('/tmp/mcp-drift.txt')
+                ? fs.readFileSync('/tmp/mcp-drift.txt', 'utf8')
+                : 'Version drift detected.';
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'chore: update MCP server versions',
+                body: `## MCP Version Drift Detected\n\n${drift}\n\nRun \`/vibe:whats-new\` to review changes before updating.`,
+                labels: ['mcp-update', 'claude-fix']
+              });
+            }
+
+      - name: Create standards review issue
+        if: steps.standards-check.outputs.stale == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'standards-review',
+              state: 'open'
+            });
+            if (existing.data.length === 0) {
+              const stale = fs.existsSync('/tmp/stale-standards.txt')
+                ? fs.readFileSync('/tmp/stale-standards.txt', 'utf8')
+                : 'Some standards need review.';
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'docs: review stale engineering standards',
+                body: `## Standards Review Needed\n\nThe following standards have not been reviewed in 6+ months:\n\n${stale}\n\nReview each file and update the \`last-reviewed\` header date.`,
+                labels: ['standards-review', 'docs']
+              });
+            }

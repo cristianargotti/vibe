@@ -1,8 +1,32 @@
-# Vibe — Dafiti Engineering Standards
+# Vibe — Dafiti Engineering Standards Plugin
 
-## Project Overview
+## Quick Start
 
-Claude Code configuration template for Dafiti teams. Enforces security, architecture, and quality standards across TypeScript/Node.js, React/Next.js, Python, Terraform, Docker, and AWS.
+```
+/plugin marketplace add dafiti-group/vibe
+/plugin install vibe
+/vibe:setup
+```
+
+## Plugin Skills
+
+- `/vibe:setup` — Interactive configuration wizard
+- `/vibe:review-security` — OWASP-based security review
+- `/vibe:deploy-check` — Pre-deployment verification
+- `/vibe:fix-issue <number>` — Fix GitHub issue with tests
+- `/vibe:refactor <path>` — Refactor preserving behavior
+- `/vibe:create-pr [base]` — Structured PR creation
+- `/vibe:test <path>` — Generate and run tests
+- `/vibe:health-check` — Validate plugin configuration
+- `/vibe:whats-new` — Check Claude Code updates
+
+## Bundled Skills (built into Claude Code)
+
+- `/simplify` — Review changed code for reuse and efficiency
+- `/batch <instruction>` — Orchestrate parallel changes across codebase
+- `/loop [interval] <prompt>` — Run recurring prompts on schedule
+- `/debug [description]` — Troubleshoot Claude Code session
+- `/claude-api` — Claude API reference for building apps
 
 ## Tech Stack
 
@@ -36,10 +60,18 @@ terraform validate    # Validate Terraform config
 
 ## Conventions
 
-- Conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`
-- Branch naming: `feat/`, `fix/`, `chore/`
+- Conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `style:`, `perf:`, `ci:`, `build:`, `revert:`
+- Branch naming: `feat/`, `fix/`, `chore/`, `docs/`, `test/`, `refactor/`
 - PRs: under 400 lines, one concern per PR
 - Testing: 80% coverage minimum, 100% on critical paths
+
+## Git Workflow
+
+- Never commit directly on main, master, or develop — always create a feature branch
+- Branch naming: `feat/`, `fix/`, `chore/`, `docs/`, `test/`, `refactor/` prefixes required
+- Commit messages must follow conventional commits: `type(scope): description`
+- After committing, push and create a PR — never merge locally
+- Never use `--no-verify` — fix the underlying issue instead
 
 ## For Detailed Standards
 
@@ -66,18 +98,9 @@ When working on a specific technology, read the relevant file in `docs/standards
 - Encrypt PII at rest (LGPD compliance)
 - Run `npm audit` / `pip audit` before deploying
 
-## Available Skills
-
-- `/review-security` — OWASP-based security review
-- `/fix-issue <number>` — Analyze and fix GitHub issue
-- `/create-pr [base]` — Create structured PR
-- `/refactor <path>` — Refactor with behavior preservation
-- `/test <path>` — Generate and run tests
-- `/deploy-check` — Pre-deployment verification checklist
-- `/simplify` — Review changed code for reuse and efficiency
-
 ## GitHub Automation
 
 - PR Review: automatic on every PR (Claude reviews against `.claude/rules/`)
 - Security Review: automatic OWASP scan on every PR
 - Issue Handler: label issues with `claude-fix`, `claude-feature`, or `claude-refactor`
+- Plugin Validation: CI checks on every push to skills/hooks/agents

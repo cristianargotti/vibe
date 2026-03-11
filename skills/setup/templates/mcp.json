@@ -1,0 +1,50 @@
+{
+  "_comment": "Base MCP config — include only selected integrations",
+  "mcpServers": {
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server:latest"
+      ],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" }
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@latest"]
+    },
+    "aws": {
+      "_comment": "Optional: AWS management (S3, IAM, VPC, CloudFormation)",
+      "command": "uvx",
+      "args": ["awslabs.core-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE:-default}" }
+    },
+    "eslint": {
+      "_comment": "Optional: ESLint diagnostics integrated in Claude",
+      "command": "npx",
+      "args": ["-y", "@eslint/mcp@latest"]
+    },
+    "terraform": {
+      "_comment": "Optional: Terraform plan/validate/apply via Docker",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        ".:/workspace",
+        "-w",
+        "/workspace",
+        "ghcr.io/hashicorp/terraform-mcp-server:latest"
+      ]
+    }
+  }
+}

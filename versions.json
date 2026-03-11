@@ -1,0 +1,16 @@
+{
+  "plugin": "2.1.0",
+  "claudeCode": "2.1.72",
+  "mcp": {
+    "github": "ghcr.io/github/github-mcp-server:latest",
+    "context7": "@upstash/context7-mcp@latest",
+    "sequential-thinking": "@modelcontextprotocol/server-sequential-thinking@latest",
+    "aws": "awslabs.core-mcp-server@latest",
+    "eslint": "@eslint/mcp@latest",
+    "terraform": "ghcr.io/hashicorp/terraform-mcp-server:latest"
+  },
+  "secretPatterns": {
+    "count": 30,
+    "lastUpdated": "2026-03-11"
+  }
+}

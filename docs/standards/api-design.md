@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # API Design Standards
 
 ## REST Endpoint Naming
@@ -26,7 +28,9 @@ Use opaque cursors, never page numbers. Encode the sort key into the cursor.
 ```typescript
 // Encode/decode helpers
 function encodeCursor(id: string, createdAt: Date): string {
-  return Buffer.from(JSON.stringify({ id, t: createdAt.toISOString() })).toString("base64url");
+  return Buffer.from(
+    JSON.stringify({ id, t: createdAt.toISOString() }),
+  ).toString("base64url");
 }
 function decodeCursor(cursor: string) {
   return JSON.parse(Buffer.from(cursor, "base64url").toString());
@@ -53,7 +57,9 @@ async function listOrders(cursor?: string, limit = 20) {
     data,
     pagination: {
       hasMore,
-      nextCursor: hasMore ? encodeCursor(data.at(-1).id, data.at(-1).created_at) : null,
+      nextCursor: hasMore
+        ? encodeCursor(data.at(-1).id, data.at(-1).created_at)
+        : null,
     },
   };
 }
@@ -63,7 +69,7 @@ Response shape:
 
 ```json
 {
-  "data": [{ "id": "ord_abc", "total": 199.90 }],
+  "data": [{ "id": "ord_abc", "total": 199.9 }],
   "pagination": {
     "hasMore": true,
     "nextCursor": "eyJpZCI6Im9yZF9hYmMiLCJ0IjoiMjAyNS0wMS0wMVQwMDowMDowMFoifQ"
@@ -78,10 +84,10 @@ All errors must follow this structure. Use RFC 7807 problem detail when applicab
 ```typescript
 interface ApiError {
   error: {
-    code: string;        // Machine-readable, e.g. "ORDER_NOT_FOUND"
-    message: string;     // Human-readable description
+    code: string; // Machine-readable, e.g. "ORDER_NOT_FOUND"
+    message: string; // Human-readable description
     details?: unknown[]; // Validation errors, per-field info
-    requestId: string;   // Correlation back to logs
+    requestId: string; // Correlation back to logs
   };
 }
 
@@ -134,7 +140,7 @@ app.use(
     max: 100,
     standardHeaders: true, // RateLimit-* headers (RFC draft)
     keyGenerator: (req) => req.headers["x-api-key"] ?? req.ip,
-  })
+  }),
 );
 
 // Endpoint-specific stricter limit
@@ -150,10 +156,15 @@ Validate all inputs at the boundary. Never trust user input.
 import { z } from "zod";
 
 const CreateOrderBody = z.object({
-  items: z.array(z.object({
-    productId: z.string().uuid(),
-    quantity: z.number().int().min(1).max(99),
-  })).min(1).max(50),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().uuid(),
+        quantity: z.number().int().min(1).max(99),
+      }),
+    )
+    .min(1)
+    .max(50),
   shippingAddressId: z.string().uuid(),
   couponCode: z.string().max(32).optional(),
 });
@@ -186,7 +197,15 @@ Protect create operations from duplicate requests. Clients must send `Idempotenc
 ```typescript
 async function idempotencyMiddleware(req, res, next) {
   const key = req.headers["idempotency-key"];
-  if (!key) return res.status(400).json({ error: { code: "MISSING_IDEMPOTENCY_KEY", message: "Idempotency-Key header is required" } });
+  if (!key)
+    return res
+      .status(400)
+      .json({
+        error: {
+          code: "MISSING_IDEMPOTENCY_KEY",
+          message: "Idempotency-Key header is required",
+        },
+      });
 
   const cached = await redis.get(`idempotency:${key}`);
   if (cached) {
@@ -196,13 +215,23 @@ async function idempotencyMiddleware(req, res, next) {
 
   const originalJson = res.json.bind(res);
   res.json = (body) => {
-    redis.set(`idempotency:${key}`, JSON.stringify({ status: res.statusCode, body }), "EX", 86400);
+    redis.set(
+      `idempotency:${key}`,
+      JSON.stringify({ status: res.statusCode, body }),
+      "EX",
+      86400,
+    );
     return originalJson(body);
   };
   next();
 }
 
-app.post("/v1/orders", idempotencyMiddleware, validate(CreateOrderBody), createOrderHandler);
+app.post(
+  "/v1/orders",
+  idempotencyMiddleware,
+  validate(CreateOrderBody),
+  createOrderHandler,
+);
 ```
 
 ## Bulk Operations
@@ -212,20 +241,25 @@ Use a batch endpoint when clients need to operate on multiple resources. Return 
 ```typescript
 // POST /v1/products/batch-update
 const BatchUpdateBody = z.object({
-  operations: z.array(z.object({
-    productId: z.string().uuid(),
-    update: z.object({
-      price: z.number().positive().optional(),
-      stock: z.number().int().min(0).optional(),
-    }),
-  })).min(1).max(100),
+  operations: z
+    .array(
+      z.object({
+        productId: z.string().uuid(),
+        update: z.object({
+          price: z.number().positive().optional(),
+          stock: z.number().int().min(0).optional(),
+        }),
+      }),
+    )
+    .min(1)
+    .max(100),
 });
 
 async function batchUpdateHandler(req, res) {
   const results = await Promise.allSettled(
     req.validatedBody.operations.map((op) =>
-      updateProduct(op.productId, op.update)
-    )
+      updateProduct(op.productId, op.update),
+    ),
   );
 
   const response = results.map((r, i) => ({
@@ -248,7 +282,7 @@ Include navigational links so clients can discover related actions.
   "data": {
     "id": "ord_abc",
     "status": "confirmed",
-    "total": 299.90
+    "total": 299.9
   },
   "_links": {
     "self": { "href": "/v1/orders/ord_abc" },
@@ -264,16 +298,21 @@ Include navigational links so clients can discover related actions.
 Co-locate OpenAPI specs in the repo. Generate them from Zod schemas when possible.
 
 ```typescript
-import { extendZodWithOpenApi, OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
+import {
+  extendZodWithOpenApi,
+  OpenApiGeneratorV3,
+} from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
 
 extendZodWithOpenApi(z);
 
-const OrderSchema = z.object({
-  id: z.string().openapi({ example: "ord_abc123" }),
-  status: z.enum(["pending", "confirmed", "shipped", "delivered"]),
-  total: z.number().openapi({ example: 299.9 }),
-}).openapi("Order");
+const OrderSchema = z
+  .object({
+    id: z.string().openapi({ example: "ord_abc123" }),
+    status: z.enum(["pending", "confirmed", "shipped", "delivered"]),
+    total: z.number().openapi({ example: 299.9 }),
+  })
+  .openapi("Order");
 
 // Registry and generator produce the full spec as JSON
 ```

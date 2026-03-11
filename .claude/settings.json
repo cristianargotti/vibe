@@ -7,7 +7,6 @@
       "Glob",
       "Grep",
       "Bash(ls *)",
-      "Bash(cat *)",
       "Bash(head *)",
       "Bash(tail *)",
       "Bash(wc *)",
@@ -55,12 +54,16 @@
       "Bash(git merge *)",
       "Bash(git push *)",
       "Bash(docker run *)",
-      "Skill(review-security)",
-      "Skill(fix-issue *)",
-      "Skill(create-pr *)",
-      "Skill(refactor *)",
-      "Skill(test *)",
-      "Skill(deploy-check)",
+      "Bash(uvx *)",
+      "Skill(vibe:review-security)",
+      "Skill(vibe:fix-issue *)",
+      "Skill(vibe:create-pr *)",
+      "Skill(vibe:refactor *)",
+      "Skill(vibe:test *)",
+      "Skill(vibe:deploy-check)",
+      "Skill(vibe:setup)",
+      "Skill(vibe:health-check)",
+      "Skill(vibe:whats-new)",
       "Skill(simplify)"
     ],
     "deny": [
@@ -82,7 +85,23 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/block-dangerous-commands.sh"
+            "command": "hooks/block-dangerous-commands.sh",
+            "statusMessage": "Checking command safety..."
+          },
+          {
+            "type": "command",
+            "command": "hooks/workflow-guard.sh",
+            "statusMessage": "Validating workflow..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/branch-guard.sh",
+            "statusMessage": "Checking branch protection..."
           }
         ]
       }
@@ -93,13 +112,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/post-edit-lint.sh"
+            "command": "hooks/post-edit-lint.sh",
+            "statusMessage": "Auto-formatting..."
           }
         ]
       }
     ],
     "Stop": [
       {
+        "matcher": "",
         "hooks": [
           {
             "type": "prompt",

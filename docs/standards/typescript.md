@@ -1,3 +1,5 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # TypeScript Standards
 
 Tier 2 reference for strict TypeScript patterns used across Dafiti services.
@@ -24,9 +26,9 @@ Every project must enable strict compiler options. Extend from the shared base c
       "@/domain/*": ["src/domain/*"],
       "@/app/*": ["src/application/*"],
       "@/infra/*": ["src/infrastructure/*"],
-      "@/shared/*": ["src/shared/*"]
-    }
-  }
+      "@/shared/*": ["src/shared/*"],
+    },
+  },
 }
 ```
 
@@ -41,8 +43,8 @@ import { z } from "zod";
 const AddressSchema = z.object({
   street: z.string().min(1),
   city: z.string().min(1),
-  state: z.string().length(2),
-  zip: z.string().regex(/^\d{5}(-\d{4})?$/),
+  state: z.string().min(2).max(5),
+  zip: z.string().regex(/^[\dA-Z]{4,10}[-\s]?[\dA-Z]{0,5}$/), // Supports BR (CEP), CO, CL, AR formats
 });
 
 const CustomerSchema = z.object({
@@ -59,7 +61,10 @@ type Address = z.infer<typeof AddressSchema>;
 type Customer = z.infer<typeof CustomerSchema>;
 
 // Partial schemas for updates
-const CustomerUpdateSchema = CustomerSchema.partial().omit({ id: true, createdAt: true });
+const CustomerUpdateSchema = CustomerSchema.partial().omit({
+  id: true,
+  createdAt: true,
+});
 type CustomerUpdate = z.infer<typeof CustomerUpdateSchema>;
 
 // Reusable refinements

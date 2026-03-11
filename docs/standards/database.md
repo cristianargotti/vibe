@@ -1,10 +1,12 @@
+<!-- last-reviewed: 2026-03-11 -->
+
 # Database Standards
 
 Tier 2 reference for database design, ORMs, migrations, caching, and connection management at Dafiti.
 
 ## Schema Design Conventions
 
-All tables MUST include: UUID primary keys, created/updated timestamps, and soft-delete support.
+All tables MUST include: primary keys (UUID preferred, BIGINT for high-volume/analytics), created/updated timestamps, and soft-delete support where applicable.
 
 ```sql
 CREATE TABLE products (
@@ -27,62 +29,72 @@ CREATE INDEX idx_products_sku ON products (sku);
 
 ```typescript
 import {
-  Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany,
-  CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index,
-} from 'typeorm';
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  Index,
+} from "typeorm";
 
-@Entity('orders')
+@Entity("orders")
 export class Order {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'varchar', length: 20, unique: true })
+  @Column({ type: "varchar", length: 20, unique: true })
   orderNumber: string;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2 })
+  @Column({ type: "decimal", precision: 12, scale: 2 })
   total: number;
 
-  @Column({ type: 'enum', enum: ['pending', 'paid', 'shipped', 'delivered', 'cancelled'] })
+  @Column({
+    type: "enum",
+    enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
+  })
   status: string;
 
   @ManyToOne(() => Customer, (customer) => customer.orders)
   customer: Customer;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   customerId: string;
 
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
   items: OrderItem[];
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ type: "timestamptz" })
   updatedAt: Date;
 
-  @DeleteDateColumn({ type: 'timestamptz' })
+  @DeleteDateColumn({ type: "timestamptz" })
   deletedAt: Date | null;
 }
 
-@Entity('order_items')
-@Index(['orderId', 'productId'], { unique: true })
+@Entity("order_items")
+@Index(["orderId", "productId"], { unique: true })
 export class OrderItem {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Order, (order) => order.items, { onDelete: "CASCADE" })
   order: Order;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   orderId: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   productId: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: "int" })
   quantity: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2 })
+  @Column({ type: "decimal", precision: 12, scale: 2 })
   unitPrice: number;
 }
 ```
@@ -90,7 +102,7 @@ export class OrderItem {
 ## TypeORM Migration
 
 ```typescript
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreateOrders1700000000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -111,7 +123,7 @@ export class CreateOrders1700000000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP TABLE IF EXISTS orders CASCADE');
+    await queryRunner.query("DROP TABLE IF EXISTS orders CASCADE");
   }
 }
 ```
@@ -180,8 +192,8 @@ class Base(DeclarativeBase):
     pass
 
 class TimestampMixin:
-    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
 class Order(TimestampMixin, Base):
@@ -253,19 +265,19 @@ CREATE INDEX idx_orders_covering ON orders (customer_id, status)
 ```typescript
 // TypeORM — DataSource config
 export const dataSource = new DataSource({
-  type: 'postgres',
+  type: "postgres",
   host: process.env.DB_HOST,
   port: 5432,
-  database: 'dafiti',
+  database: "dafiti",
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   extra: {
-    max: 20,                 // max connections in pool
-    min: 5,                  // min idle connections
+    max: 20, // max connections in pool
+    min: 5, // min idle connections
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
   },
-  logging: process.env.NODE_ENV !== 'production',
+  logging: process.env.NODE_ENV !== "production",
 });
 ```
 
@@ -286,14 +298,14 @@ engine = create_engine(
 ## Redis Cache-Aside Pattern
 
 ```typescript
-import Redis from 'ioredis';
+import Redis from "ioredis";
 
-const redis = new Redis({ host: 'redis', port: 6379, maxRetriesPerRequest: 3 });
+const redis = new Redis({ host: "redis", port: 6379, maxRetriesPerRequest: 3 });
 
 const TTL = {
-  SHORT:  60,       // 1 minute — volatile data
-  MEDIUM: 300,      // 5 minutes — product listings
-  LONG:   3600,     // 1 hour — category trees
+  SHORT: 60, // 1 minute — volatile data
+  MEDIUM: 300, // 5 minutes — product listings
+  LONG: 3600, // 1 hour — category trees
 };
 
 async function getProduct(id: string): Promise<Product> {
@@ -312,12 +324,15 @@ async function getProduct(id: string): Promise<Product> {
   }
 
   // 3. Populate cache with TTL
-  await redis.set(cacheKey, JSON.stringify(product), 'EX', TTL.MEDIUM);
+  await redis.set(cacheKey, JSON.stringify(product), "EX", TTL.MEDIUM);
 
   return product;
 }
 
-async function updateProduct(id: string, data: Partial<Product>): Promise<Product> {
+async function updateProduct(
+  id: string,
+  data: Partial<Product>,
+): Promise<Product> {
   const product = await productRepository.save({ id, ...data });
 
   // Invalidate cache on write
@@ -329,9 +344,9 @@ async function updateProduct(id: string, data: Partial<Product>): Promise<Produc
 
 ## Key Rules
 
-- All tables use UUID primary keys, never auto-increment integers.
+- Prefer UUID primary keys for distributed/public-facing tables. Auto-increment (BIGINT) is acceptable for internal, high-volume, or analytics tables.
 - Every table must have `created_at`, `updated_at`, and `deleted_at` columns.
-- Use soft deletes (`deleted_at IS NOT NULL`) — never hard-delete business data.
+- Use soft deletes for business data (orders, customers). Hard-delete is required for PII when fulfilling LGPD/GDPR erasure requests — anonymize business records, then delete personal data.
 - All partial indexes must filter out soft-deleted rows (`WHERE deleted_at IS NULL`).
 - Migrations must be reversible — always implement `down`/`downgrade`.
 - Connection pools: 20 max connections per service, with pre-ping enabled.
