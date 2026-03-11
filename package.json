@@ -11,7 +11,10 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}'",
     "format:check": "prettier --check '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}'",
-    "test": "echo \"Configure test runner: npx vitest or jest\" && exit 0",
+    "test": "bats tests/",
+    "test:hooks": "bats tests/block-dangerous-commands.bats tests/workflow-guard.bats tests/branch-guard.bats tests/post-edit-lint.bats tests/validate-config.bats",
+    "test:git-hooks": "bats tests/commit-msg.bats",
+    "test:structure": "bats tests/plugin-structure.bats",
     "build": "echo \"Configure build: tsc or next build\" && exit 0"
   },
   "devDependencies": {
