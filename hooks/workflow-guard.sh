@@ -71,7 +71,31 @@ if echo "$COMMAND" | grep -qE 'git[[:space:]]+commit\b'; then
   fi
 fi
 
-# --- 5. Secret detection in staged diff before commit ---
+# --- 5. Block PR merge if CI checks haven't passed ---
+if echo "$COMMAND" | grep -qE 'gh[[:space:]]+pr[[:space:]]+merge'; then
+  # Extract PR number: try after merge, or any number in the command
+  PR_NUM=$(echo "$COMMAND" | grep -oE '[0-9]+' | head -1)
+  # Fallback: detect current branch's PR if no number given
+  if [ -z "$PR_NUM" ] && command -v gh &>/dev/null; then
+    PR_NUM=$(gh pr view --json number -q .number 2>/dev/null || echo "")
+  fi
+  if [ -n "$PR_NUM" ]; then
+    if command -v gh &>/dev/null; then
+      CHECKS_OUTPUT=$(gh pr checks "$PR_NUM" 2>/dev/null || true)
+      if [ -n "$CHECKS_OUTPUT" ]; then
+        # gh pr checks uses: pass, fail, pending, skipping
+        if echo "$CHECKS_OUTPUT" | grep -qi 'pending'; then
+          deny "Blocked: PR #${PR_NUM} has pending CI checks. Wait for all checks to complete before merging."
+        fi
+        if echo "$CHECKS_OUTPUT" | grep -qE '\bfail\b'; then
+          deny "Blocked: PR #${PR_NUM} has failing CI checks. Fix the failures before merging."
+        fi
+      fi
+    fi
+  fi
+fi
+
+# --- 6. Secret detection in staged diff before commit ---
 if echo "$COMMAND" | grep -qE 'git[[:space:]]+commit\b'; then
   STAGED=$(git diff --cached --name-only 2>/dev/null || true)
   if [ -n "$STAGED" ]; then

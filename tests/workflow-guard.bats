@@ -249,6 +249,18 @@ run_hook() {
   [[ -z "$result" ]]
 }
 
+# --- PR Merge Guard ---
+
+@test "workflow-guard checks CI status before gh pr merge" {
+  grep -q 'pr.*merge' "$HOOK"
+  grep -q 'pr checks' "$HOOK"
+}
+
+@test "allows: non-merge gh pr commands" {
+  result=$(run_hook "gh pr list")
+  [[ -z "$result" ]]
+}
+
 # --- Secret Detection: verify patterns load from external file ---
 
 @test "secret-patterns.txt is used by workflow-guard" {
