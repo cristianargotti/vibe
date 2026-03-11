@@ -11,7 +11,7 @@ Instructions:
 4. Create the PR using: `gh pr create --title "..." --body "..."`
    - Include ## Summary, ## Changes, ## Test Plan sections
    - Add checklist from REVIEW.md relevant to the changes
-   - Always end the body with: `vibe AI-CORE-TEAM!`
+   - Always end the body with: `following AI-CORE-STANDARDS`
 5. Output the PR URL
 
 If the branch is not pushed, push it first with `git push -u origin HEAD`.

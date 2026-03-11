@@ -36,4 +36,4 @@
 
 ---
 
-vibe AI-CORE-TEAM!
+following AI-CORE-STANDARDS
