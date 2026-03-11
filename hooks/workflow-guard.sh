@@ -32,11 +32,19 @@ if echo "$COMMAND" | grep -qE -- '--no-verify'; then
   deny "Blocked: --no-verify bypasses safety hooks. Remove it and fix the underlying issue."
 fi
 
-# --- 3. Enforce branch naming on git checkout -b / git switch -c ---
+# --- 3. Enforce branch naming + base freshness on git checkout -b / git switch -c ---
 if echo "$COMMAND" | grep -qE 'git[[:space:]]+(checkout[[:space:]]+-b|switch[[:space:]]+-c)[[:space:]]+'; then
   BRANCH_NAME=$(echo "$COMMAND" | grep -oE '(checkout[[:space:]]+-b|switch[[:space:]]+-c)[[:space:]]+[^[:space:]]+' | awk '{print $NF}')
   if [ -n "$BRANCH_NAME" ] && ! echo "$BRANCH_NAME" | grep -qE '^(feat|fix|chore|docs|test|refactor)/'; then
     deny "Blocked: branch '${BRANCH_NAME}' must start with feat/, fix/, chore/, docs/, test/, or refactor/"
+  fi
+  # Check if current branch is behind its remote (no network, uses last fetch)
+  CURRENT=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+  if [ -n "$CURRENT" ]; then
+    BEHIND=$(git rev-list HEAD..@{u} --count 2>/dev/null || echo "0")
+    if [ "$BEHIND" -gt 0 ]; then
+      deny "Blocked: '${CURRENT}' is ${BEHIND} commit(s) behind remote. Run 'git pull' before creating a new branch."
+    fi
   fi
 fi
 

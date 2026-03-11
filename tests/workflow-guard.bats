@@ -254,3 +254,9 @@ run_hook() {
 @test "secret-patterns.txt is used by workflow-guard" {
   grep -q "secret-patterns.txt" "$HOOK"
 }
+
+# --- Branch freshness check ---
+
+@test "workflow-guard checks upstream freshness on branch creation" {
+  grep -q '@{u}' "$HOOK"
+}
