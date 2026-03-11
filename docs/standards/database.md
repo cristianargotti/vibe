@@ -4,7 +4,7 @@ Tier 2 reference for database design, ORMs, migrations, caching, and connection 
 
 ## Schema Design Conventions
 
-All tables MUST include: UUID primary keys, created/updated timestamps, and soft-delete support.
+All tables MUST include: primary keys (UUID preferred, BIGINT for high-volume/analytics), created/updated timestamps, and soft-delete support where applicable.
 
 ```sql
 CREATE TABLE products (
@@ -342,9 +342,9 @@ async function updateProduct(
 
 ## Key Rules
 
-- All tables use UUID primary keys, never auto-increment integers.
+- Prefer UUID primary keys for distributed/public-facing tables. Auto-increment (BIGINT) is acceptable for internal, high-volume, or analytics tables.
 - Every table must have `created_at`, `updated_at`, and `deleted_at` columns.
-- Use soft deletes (`deleted_at IS NOT NULL`) — never hard-delete business data.
+- Use soft deletes for business data (orders, customers). Hard-delete is required for PII when fulfilling LGPD/GDPR erasure requests — anonymize business records, then delete personal data.
 - All partial indexes must filter out soft-deleted rows (`WHERE deleted_at IS NULL`).
 - Migrations must be reversible — always implement `down`/`downgrade`.
 - Connection pools: 20 max connections per service, with pre-ping enabled.

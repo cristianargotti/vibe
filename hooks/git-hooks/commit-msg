@@ -5,15 +5,20 @@
 set -euo pipefail
 
 COMMIT_MSG_FILE="$1"
-COMMIT_MSG=$(head -1 "$COMMIT_MSG_FILE")
+COMMIT_MSG=$(head -n 1 "$COMMIT_MSG_FILE")
 
 # Allow merge commits
-if echo "$COMMIT_MSG" | grep -qiE '^Merge\s'; then
+if echo "$COMMIT_MSG" | grep -qiE '^Merge[[:space:]]'; then
+  exit 0
+fi
+
+# Allow fixup and squash commits (used during interactive rebase)
+if echo "$COMMIT_MSG" | grep -qE '^(fixup|squash)![[:space:]]'; then
   exit 0
 fi
 
 # Validate conventional commit format
-if ! echo "$COMMIT_MSG" | grep -qE '^(feat|fix|refactor|docs|test|chore|style|perf|ci|build|revert)(\(.+\))?!?:\s'; then
+if ! echo "$COMMIT_MSG" | grep -qE '^(feat|fix|refactor|docs|test|chore|style|perf|ci|build|revert)(\(.+\))?!?:[[:space:]]'; then
   echo "ERROR: Commit message does not follow conventional commits format."
   echo ""
   echo "Expected: type(scope): description"

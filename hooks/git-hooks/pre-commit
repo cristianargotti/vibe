@@ -13,20 +13,21 @@ if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then
   exit 1
 fi
 
-# --- 2. Secret detection in staged files ---
+# --- 2. Secret detection in staged diff ---
 STAGED=$(git diff --cached --name-only 2>/dev/null || true)
 
 if [ -n "$STAGED" ]; then
   SECRETS_FOUND=""
   while IFS= read -r file; do
     [ -f "$file" ] || continue
-    if grep -qE '(AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{20,}|sk-ant-[a-zA-Z0-9-]{20,}|-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----|ghp_[a-zA-Z0-9]{36}|password\s*=\s*["'"'"'][^\s"'"'"']{8,}["'"'"'])' "$file" 2>/dev/null; then
+    # Scan only added lines in the staged diff, not the entire file
+    if git diff --cached -- "$file" 2>/dev/null | grep -qE '^\+.*(AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{20,}|sk-ant-[a-zA-Z0-9-]{20,}|-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9_-]{20,}|xoxb-[a-zA-Z0-9-]+)'; then
       SECRETS_FOUND="${SECRETS_FOUND}  - ${file}\n"
     fi
   done <<< "$STAGED"
   if [ -n "$SECRETS_FOUND" ]; then
     echo "ERROR: Potential secrets detected in staged files:"
-    echo -e "$SECRETS_FOUND"
+    printf '%b' "$SECRETS_FOUND"
     echo "Remove secrets and use environment variables or Secrets Manager."
     exit 1
   fi

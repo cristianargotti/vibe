@@ -13,11 +13,11 @@ export default defineConfig({
     environment: "node",
     include: ["src/**/*.test.ts"],
     coverage: {
-      provider: "v8",          // Prefer v8 over istanbul for speed
+      provider: "v8", // Prefer v8 over istanbul for speed
       reporter: ["text", "lcov", "json-summary"],
       thresholds: {
         statements: 80,
-        branches: 75,
+        branches: 80,
         functions: 80,
         lines: 80,
       },
@@ -140,16 +140,18 @@ describe("OrderService", () => {
     });
 
     it("throws when cart is empty", async () => {
-      await expect(service.createOrder("cust_123", []))
-        .rejects.toThrow("Cart must contain at least one item");
+      await expect(service.createOrder("cust_123", [])).rejects.toThrow(
+        "Cart must contain at least one item",
+      );
     });
 
     it("rejects quantities exceeding available stock", async () => {
       mockRepo.getStock.mockResolvedValue(5);
       const items = [{ productId: "prod_1", quantity: 10 }];
 
-      await expect(service.createOrder("cust_123", items))
-        .rejects.toThrow("Insufficient stock");
+      await expect(service.createOrder("cust_123", items)).rejects.toThrow(
+        "Insufficient stock",
+      );
     });
   });
 });
@@ -205,7 +207,10 @@ Use real databases in CI. Testcontainers manages container lifecycle automatical
 ```typescript
 // src/test/integration/order.repo.test.ts
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { PostgreSqlContainer, StartedPostgreSqlContainer } from "@testcontainers/postgresql";
+import {
+  PostgreSqlContainer,
+  StartedPostgreSqlContainer,
+} from "@testcontainers/postgresql";
 import { OrderRepository } from "@/repositories/order.repository";
 import { migrate } from "@/database/migrate";
 
@@ -227,7 +232,11 @@ describe("OrderRepository (integration)", () => {
   });
 
   it("persists and retrieves an order by ID", async () => {
-    const created = await repo.create({ customerId: "cust_1", items: [], total: 99.9 });
+    const created = await repo.create({
+      customerId: "cust_1",
+      items: [],
+      total: 99.9,
+    });
     const found = await repo.findById(created.id);
     expect(found).toMatchObject({ customerId: "cust_1", total: 99.9 });
   });
@@ -276,7 +285,9 @@ test.describe("Checkout flow", () => {
     await page.getByLabel("CVV").fill("123");
     await page.getByRole("button", { name: "Place Order" }).click();
 
-    await expect(page.getByText("Order confirmed")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("Order confirmed")).toBeVisible({
+      timeout: 10_000,
+    });
   });
 });
 ```
@@ -342,7 +353,10 @@ Verify API contracts between services stay in sync using Pact.
 import { PactV4, MatchersV3 } from "@pact-foundation/pact";
 const { like, eachLike, uuid } = MatchersV3;
 
-const pact = new PactV4({ consumer: "checkout-bff", provider: "order-service" });
+const pact = new PactV4({
+  consumer: "checkout-bff",
+  provider: "order-service",
+});
 
 test("GET /v1/orders/:id returns an order", async () => {
   await pact

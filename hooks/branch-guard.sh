@@ -5,11 +5,15 @@
 
 set -euo pipefail
 
+# Consume stdin (required by hook protocol)
+cat > /dev/null
+
 # Fast check: get current branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
 
 if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then
-  echo "{\"decision\":\"deny\",\"reason\":\"Blocked: cannot modify files on '$BRANCH'. Create a feature branch first: git checkout -b feat/your-feature\"}"
+  REASON=$(echo "Blocked: cannot modify files on '${BRANCH}'. Create a feature branch first: git checkout -b feat/your-feature" | sed 's/"/\\"/g')
+  echo "{\"decision\":\"deny\",\"reason\":\"${REASON}\"}"
   exit 0
 fi
 

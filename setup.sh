@@ -17,6 +17,26 @@ info() { echo -e "${GREEN}[vibe]${NC} $1"; }
 warn() { echo -e "${YELLOW}[vibe]${NC} $1"; }
 error() { echo -e "${RED}[vibe]${NC} $1"; exit 1; }
 
+# Safe copy: skip if target file already exists
+safe_copy() {
+  local src="$1"
+  local dst="$2"
+  if [ -f "$dst" ]; then
+    warn "Skipping $dst (already exists)"
+  else
+    cp "$src" "$dst"
+  fi
+}
+
+# Detect package manager
+detect_pkg_manager() {
+  if [ -f "bun.lockb" ]; then echo "bun"
+  elif [ -f "pnpm-lock.yaml" ]; then echo "pnpm"
+  elif [ -f "yarn.lock" ]; then echo "yarn"
+  else echo "npm"
+  fi
+}
+
 # --- Prerequisite checks ---
 info "Checking prerequisites..."
 
@@ -98,10 +118,11 @@ if [ -d "$SCRIPT_DIR/.github" ]; then
   cp -r "$SCRIPT_DIR/.github/"* .github/
 fi
 
-# Copy root files
-cp "$SCRIPT_DIR/CLAUDE.md" . 2>/dev/null || true
-cp "$SCRIPT_DIR/REVIEW.md" . 2>/dev/null || true
-cp "$SCRIPT_DIR/.mcp.json" . 2>/dev/null || true
+# Copy root files (safe: skip if already exist)
+safe_copy "$SCRIPT_DIR/CLAUDE.md" "CLAUDE.md"
+safe_copy "$SCRIPT_DIR/REVIEW.md" "REVIEW.md"
+safe_copy "$SCRIPT_DIR/.mcp.json" ".mcp.json"
+safe_copy "$SCRIPT_DIR/eslint.config.mjs" "eslint.config.mjs"
 
 # --- Smart merge .gitignore ---
 if [ -f ".gitignore" ]; then
@@ -116,9 +137,25 @@ else
 fi
 
 # --- Handle package.json ---
+PKG_MGR=$(detect_pkg_manager)
+info "Detected package manager: $PKG_MGR"
+
 if [ -f "package.json" ]; then
   info "Adding dev dependencies to existing package.json..."
-  npm install --save-dev eslint prettier @typescript-eslint/eslint-plugin @typescript-eslint/parser 2>/dev/null || warn "npm install failed — you may need to install dependencies manually"
+  case "$PKG_MGR" in
+    bun)
+      bun add -d eslint prettier @typescript-eslint/eslint-plugin @typescript-eslint/parser 2>/dev/null || warn "$PKG_MGR install failed — install dependencies manually"
+      ;;
+    pnpm)
+      pnpm add -D eslint prettier @typescript-eslint/eslint-plugin @typescript-eslint/parser 2>/dev/null || warn "$PKG_MGR install failed — install dependencies manually"
+      ;;
+    yarn)
+      yarn add -D eslint prettier @typescript-eslint/eslint-plugin @typescript-eslint/parser 2>/dev/null || warn "$PKG_MGR install failed — install dependencies manually"
+      ;;
+    *)
+      npm install --save-dev eslint prettier @typescript-eslint/eslint-plugin @typescript-eslint/parser 2>/dev/null || warn "$PKG_MGR install failed — install dependencies manually"
+      ;;
+  esac
 else
   cp "$SCRIPT_DIR/package.json" .
   info "Created package.json with dev dependencies"
@@ -161,16 +198,16 @@ echo "  .claude/skills/        → Advanced skills (/review-security, /fix-issue
 echo "  .claude/agents/        → Specialized agents (code-reviewer, ecommerce-expert, infra-reviewer)"
 echo "  .claude/settings.json  → Permissions, hooks, safety guards"
 echo "  docs/standards/        → Tier 2: Detailed coding standards (on-demand)"
-echo "  hooks/                 → Pre/post tool-use hooks"
+echo "  hooks/                 → Pre/post tool-use hooks + native git hooks"
 echo "  .github/               → Issue templates, PR template, CI workflows"
 echo "  CLAUDE.md              → Main configuration hub"
 echo "  REVIEW.md              → Code review guidelines"
 echo "  .mcp.json              → MCP server configuration"
 echo ""
 info "Next steps:"
-echo "  1. Run: npm install"
+echo "  1. Run: $PKG_MGR install"
 echo "  2. Set GITHUB_TOKEN for MCP GitHub server"
-echo "  3. Set ANTHROPIC_API_KEY in GitHub repo secrets (for CI workflows)"
+echo "  3. Add CLAUDE_CODE_OAUTH_TOKEN to GitHub repo secrets (from: claude setup-token)"
 echo "  4. Enable branch protection on main in GitHub (Settings > Branches > Add rule)"
 echo "  5. Start coding: claude"
 echo ""

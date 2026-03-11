@@ -58,7 +58,13 @@ export class Order {
     if (this.status !== "pending") {
       throw new OrderDomainError("Only pending orders can be cancelled");
     }
-    return new Order(this.id, this.customerId, this.items, "cancelled", this.createdAt);
+    return new Order(
+      this.id,
+      this.customerId,
+      this.items,
+      "cancelled",
+      this.createdAt,
+    );
   }
 }
 
@@ -66,7 +72,11 @@ export class Order {
 export abstract class OrderRepository {
   abstract findById(id: string): Promise<Order | null>;
   abstract save(order: Order): Promise<Order>;
-  abstract findByCustomer(customerId: string, page: number, limit: number): Promise<Order[]>;
+  abstract findByCustomer(
+    customerId: string,
+    page: number,
+    limit: number,
+  ): Promise<Order[]>;
 }
 
 // application/order.service.ts
@@ -75,13 +85,19 @@ export class OrderService {
   constructor(private readonly orderRepo: OrderRepository) {}
 
   async create(dto: CreateOrderDto, userId: string): Promise<Order> {
-    const order = new Order(randomUUID(), userId, dto.items, "pending", new Date());
+    const order = new Order(
+      randomUUID(),
+      userId,
+      dto.items,
+      "pending",
+      new Date(),
+    );
     return this.orderRepo.save(order);
   }
 
   async cancel(orderId: string): Promise<Order> {
     const order = await this.orderRepo.findById(orderId);
-    if (!order) throw new NotFoundException(`Order ${orderId} not found`);
+    if (!order) throw new NotFoundError(`Order ${orderId} not found`); // Domain error, not NestJS HttpException
     const cancelled = order.cancel();
     return this.orderRepo.save(cancelled);
   }
@@ -104,7 +120,9 @@ export class OrderController {
   }
 
   @Patch(":id/cancel")
-  async cancel(@Param("id", ParseUUIDPipe) id: string): Promise<OrderResponseDto> {
+  async cancel(
+    @Param("id", ParseUUIDPipe) id: string,
+  ): Promise<OrderResponseDto> {
     const order = await this.orderService.cancel(id);
     return OrderResponseDto.from(order);
   }
@@ -205,7 +223,9 @@ export class LoggingInterceptor implements NestInterceptor {
       }),
       catchError((error) => {
         const duration = Date.now() - start;
-        this.logger.error(`${method} ${url} failed after ${duration}ms: ${error.message}`);
+        this.logger.error(
+          `${method} ${url} failed after ${duration}ms: ${error.message}`,
+        );
         throw error;
       }),
     );
@@ -260,9 +280,11 @@ export class AppExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof AppError) {
       response.status(exception.statusCode).json({
-        code: exception.code,
-        message: exception.message,
-        details: exception.details,
+        error: {
+          code: exception.code,
+          message: exception.message,
+          details: exception.details,
+        },
       });
       return;
     }
@@ -274,7 +296,9 @@ export class AppExceptionFilter implements ExceptionFilter {
     }
 
     this.logger.error("Unhandled exception", exception);
-    response.status(500).json({ code: "INTERNAL_ERROR", message: "Internal server error" });
+    response.status(500).json({
+      error: { code: "INTERNAL_ERROR", message: "Internal server error" },
+    });
   }
 }
 ```

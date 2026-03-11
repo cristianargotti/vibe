@@ -31,11 +31,24 @@ interface PaginationState {
 }
 
 export function usePagination(initialLimit: number = 20) {
-  const [state, setState] = useState<PaginationState>({ page: 1, limit: initialLimit, total: 0 });
+  const [state, setState] = useState<PaginationState>({
+    page: 1,
+    limit: initialLimit,
+    total: 0,
+  });
 
-  const setPage = useCallback((page: number) => setState((s) => ({ ...s, page })), []);
-  const setTotal = useCallback((total: number) => setState((s) => ({ ...s, total })), []);
-  const totalPages = useMemo(() => Math.ceil(state.total / state.limit), [state.total, state.limit]);
+  const setPage = useCallback(
+    (page: number) => setState((s) => ({ ...s, page })),
+    [],
+  );
+  const setTotal = useCallback(
+    (total: number) => setState((s) => ({ ...s, total })),
+    [],
+  );
+  const totalPages = useMemo(
+    () => Math.ceil(state.total / state.limit),
+    [state.total, state.limit],
+  );
 
   return { ...state, totalPages, setPage, setTotal } as const;
 }
@@ -109,7 +122,8 @@ type AppStore = CartSlice & UISlice;
 const createCartSlice = (set: SetState<AppStore>): CartSlice => ({
   items: [],
   addItem: (item) => set((s) => ({ items: [...s.items, item] })),
-  removeItem: (productId) => set((s) => ({ items: s.items.filter((i) => i.productId !== productId) })),
+  removeItem: (productId) =>
+    set((s) => ({ items: s.items.filter((i) => i.productId !== productId) })),
   clearCart: () => set({ items: [] }),
 });
 
@@ -160,13 +174,21 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.error) {
       if (this.props.fallback) {
-        return this.props.fallback({ error: this.state.error, reset: this.reset });
+        return this.props.fallback({
+          error: this.state.error,
+          reset: this.reset,
+        });
       }
       return (
         <div role="alert" className="p-6 text-center">
           <h2 className="text-lg font-semibold">Something went wrong</h2>
-          <p className="mt-2 text-sm text-gray-600">{this.state.error.message}</p>
-          <button onClick={this.reset} className="mt-4 rounded bg-blue-600 px-4 py-2 text-white">
+          <p className="mt-2 text-sm text-gray-600">
+            {this.state.error.message}
+          </p>
+          <button
+            onClick={this.reset}
+            className="mt-4 rounded bg-blue-600 px-4 py-2 text-white"
+          >
             Try again
           </button>
         </div>
@@ -183,8 +205,16 @@ Use a shared skeleton primitive. Compose it for specific layouts.
 
 ```tsx
 // components/ui/skeleton.tsx
-export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={`animate-pulse rounded bg-gray-200 ${className ?? ""}`} {...props} />;
+export function Skeleton({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={`animate-pulse rounded bg-gray-200 ${className ?? ""}`}
+      {...props}
+    />
+  );
 }
 
 // components/product/product-card-skeleton.tsx
@@ -204,13 +234,13 @@ export function ProductCardSkeleton() {
 
 Use this decision tree to choose component type.
 
-| Condition | Component Type |
-|---|---|
-| Fetches data at render time | Server Component |
-| Uses `useState`, `useEffect`, or browser APIs | Client Component (`"use client"`) |
-| Handles user interaction (click, submit, hover) | Client Component |
-| Renders static or data-driven markup only | Server Component |
-| Needs access to cookies/headers at request time | Server Component |
+| Condition                                       | Component Type                    |
+| ----------------------------------------------- | --------------------------------- |
+| Fetches data at render time                     | Server Component                  |
+| Uses `useState`, `useEffect`, or browser APIs   | Client Component (`"use client"`) |
+| Handles user interaction (click, submit, hover) | Client Component                  |
+| Renders static or data-driven markup only       | Server Component                  |
+| Needs access to cookies/headers at request time | Server Component                  |
 
 ```tsx
 // app/products/page.tsx — Server Component (default)
@@ -225,10 +255,14 @@ export default async function ProductsPage() {
 }
 
 // components/product/add-to-cart-button.tsx — Client Component
-"use client";
+("use client");
 export function AddToCartButton({ productId }: { productId: string }) {
   const addItem = useAppStore((s) => s.addItem);
-  return <button onClick={() => addItem({ productId, quantity: 1 })}>Add to cart</button>;
+  return (
+    <button onClick={() => addItem({ productId, quantity: 1 })}>
+      Add to cart
+    </button>
+  );
 }
 ```
 
@@ -264,13 +298,17 @@ const CheckoutSchema = z.object({
   name: z.string().min(2),
   address: z.string().min(5),
   city: z.string().min(2),
-  zip: z.string().regex(/^\d{5}$/),
+  zip: z.string().regex(/^[\dA-Z]{4,10}[-\s]?[\dA-Z]{0,5}$/), // Supports BR, CO, CL, AR formats
 });
 
 type CheckoutForm = z.infer<typeof CheckoutSchema>;
 
 export function CheckoutForm() {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<CheckoutForm>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CheckoutForm>({
     resolver: zodResolver(CheckoutSchema),
   });
 
@@ -282,11 +320,15 @@ export function CheckoutForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <input {...register("email")} placeholder="Email" />
-        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+        {errors.email && (
+          <p className="text-red-500 text-sm">{errors.email.message}</p>
+        )}
       </div>
       <div>
         <input {...register("name")} placeholder="Full name" />
-        {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+        {errors.name && (
+          <p className="text-red-500 text-sm">{errors.name.message}</p>
+        )}
       </div>
       <button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Placing order..." : "Place order"}
@@ -316,7 +358,11 @@ app/
 
 ```tsx
 // app/layout.tsx
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>
