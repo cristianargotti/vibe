@@ -15,3 +15,4 @@ Always version-control prompts as code. Never hardcode prompts inline.
 Always document API endpoints with OpenAPI/Swagger specs.
 Never commit directly on main, master, or develop — always use a feature branch and PR.
 Never use --no-verify — fix the underlying issue instead of bypassing hooks.
+Never add Co-Authored-By lines in commits. Credit the team, not the tool.
