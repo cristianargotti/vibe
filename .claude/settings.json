@@ -55,6 +55,11 @@
       "Bash(git push *)",
       "Bash(docker run *)",
       "Bash(uvx *)",
+      "Bash(git diff)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(git switch *)",
+      "Bash(git rebase *)",
       "Skill(vibe:review-security)",
       "Skill(vibe:fix-issue *)",
       "Skill(vibe:create-pr *)",
@@ -124,6 +129,18 @@
           {
             "type": "prompt",
             "prompt": "Before finishing, verify: 1) All tests pass 2) No security issues introduced 3) Code follows project conventions in .claude/rules/ 4) No secrets or PII exposed"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/validate-config.sh",
+            "statusMessage": "Validating Vibe configuration...",
+            "timeout": 5
           }
         ]
       }

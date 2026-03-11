@@ -191,6 +191,34 @@
   [[ "$result" == "false" ]]
 }
 
+@test ".claude/settings.json has SessionStart hook" {
+  count=$(jq '.hooks.SessionStart | length' .claude/settings.json)
+  [[ "$count" -gt 0 ]]
+}
+
+@test ".claude/settings.json SessionStart hook has no matcher field" {
+  result=$(jq '.hooks.SessionStart[0] | has("matcher")' .claude/settings.json)
+  [[ "$result" == "false" ]]
+}
+
+# --- Permissions completeness ---
+
+@test "settings.json has Bash(uvx *) permission" {
+  jq -r '.permissions.allow[]' settings.json | grep -q 'Bash(uvx \*)'
+}
+
+@test "settings.json has git fetch permission" {
+  jq -r '.permissions.allow[]' settings.json | grep -q 'Bash(git fetch \*)'
+}
+
+@test "settings.json has git pull permission" {
+  jq -r '.permissions.allow[]' settings.json | grep -q 'Bash(git pull \*)'
+}
+
+@test "settings.json has git switch permission" {
+  jq -r '.permissions.allow[]' settings.json | grep -q 'Bash(git switch \*)'
+}
+
 # --- Skills have vibe: prefix in permissions ---
 
 @test "settings.json includes vibe:review-security skill" {
