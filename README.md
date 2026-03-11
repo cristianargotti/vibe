@@ -4,7 +4,7 @@ Claude Code plugin for Dafiti engineering teams. Security, architecture, and qua
 
 ## What is Vibe
 
-Vibe is a **Claude Code plugin** that brings Dafiti's engineering standards into every coding session. It provides:
+Vibe is a **Claude Code plugin** that brings Dafiti's engineering standards into every coding session:
 
 - **Interactive setup** — `/vibe:setup` wizard configures your project in seconds
 - **Automated guards** — Hooks that prevent dangerous commands, enforce branch protection, scan for secrets
@@ -14,215 +14,275 @@ Vibe is a **Claude Code plugin** that brings Dafiti's engineering standards into
 
 ## Installation
 
-### As a Claude Code Plugin (recommended)
-
 ```
 /plugin marketplace add dafiti-group/vibe
 /plugin install vibe
 /vibe:setup
 ```
 
-### Manual Setup (legacy)
+That's it. The wizard handles everything else.
 
-```bash
-git clone https://github.com/dafiti-group/vibe.git /tmp/vibe
-cd /path/to/your/project
-bash /tmp/vibe/setup.sh .
-rm -rf /tmp/vibe
+## Usage Examples
+
+### Configure a new project
+
 ```
+> /vibe:setup
+
+Which technologies does this project use?
+  [x] TypeScript / NestJS (backend)
+  [x] React / Next.js (frontend)
+
+What security level?
+  ( ) Basic
+  (x) Standard
+  ( ) Strict
+
+Vibe Setup Complete!
+  CLAUDE.md              — Project configuration hub
+  .claude/rules/         — 5 rule files (backend, frontend, security, quality, infra)
+  .claude/settings.json  — Permissions + hooks
+  .mcp.json              — GitHub + Context7 MCP servers
+  docs/standards/        — 12 detailed coding standards
+```
+
+### Review security before a release
+
+```
+> /vibe:review-security
+
+Security Review — OWASP Top 10
+
+Critical:
+  src/auth/login.controller.ts:42 — SQL concatenation in user lookup
+  Recommendation: Use parameterized query with repository pattern
+
+High:
+  src/payments/pix.service.ts:18 — PII (CPF) logged in plain text
+  Recommendation: Redact PII before logging (LGPD requirement)
+
+Passing:
+  JWT implementation uses short-lived tokens (15min) with refresh
+  All API endpoints have input validation via DTOs
+```
+
+### Fix a GitHub issue
+
+```
+> /vibe:fix-issue 42
+
+Reading issue #42: "Cart total doesn't account for PIX discount"
+Analyzing src/cart/cart.service.ts...
+Root cause: discount applied after tax instead of before
+
+Fix applied:
+  src/cart/cart.service.ts — Reorder discount/tax calculation
+  src/cart/cart.service.test.ts — Added 3 regression tests
+
+Commit: fix: apply PIX discount before tax calculation (Fixes #42)
+```
+
+### Create a PR with standards
+
+```
+> /vibe:create-pr
+
+Analyzing changes: 4 files, 127 lines
+Pushing branch feat/fix-cart-discount...
+
+Created PR #15: fix: apply PIX discount before tax calculation
+  https://github.com/dafiti-group/my-service/pull/15
+
+  following AI-CORE-STANDARDS
+```
+
+### Pre-deployment check
+
+```
+> /vibe:deploy-check
+
+Linting          — PASS
+Type checking    — PASS
+Test coverage    — PASS (87%)
+Security audit   — PASS (0 vulnerabilities)
+Docker build     — PASS
+Outdated deps    — WARN (3 packages outdated)
+
+DEPLOY STATUS: READY
+Warnings: 3 outdated packages (non-blocking)
+```
+
+### Validate plugin health
+
+```
+> /vibe:health-check
+
+Plugin:    PASS  plugin.json + marketplace.json valid
+Hooks:     PASS  5/5 scripts executable
+Skills:    PASS  9/9 SKILL.md with valid frontmatter
+Agents:    PASS  3/3 non-empty
+Settings:  PASS  Valid JSON
+Standards: PASS  12/12 files present
+Version:   PASS  2.1.72
+
+Status: HEALTHY (34/34 checks passed)
+```
+
+## How It Works
+
+### When Vibe is installed as a plugin:
+
+1. **Skills** (`skills/*/SKILL.md`) become available as `/vibe:*` slash commands
+2. **Hooks** (`hooks/hooks.json`) activate automatically — blocking dangerous commands, enforcing branch protection, auto-formatting
+3. **Agents** (`agents/*.md`) are available for specialized code review, e-commerce domain knowledge, and infra review
+4. **Permissions** (`settings.json`) provide sensible defaults for tool access
+
+### When `/vibe:setup` runs in a target project:
+
+1. Generates `CLAUDE.md` tailored to the selected tech stack
+2. Copies relevant `.claude/rules/` (lean directives, always loaded)
+3. Copies `docs/standards/` (detailed patterns, loaded on-demand)
+4. Configures `.claude/settings.json` with permissions + hooks based on security level
+5. Sets up `.mcp.json` with selected integrations
+6. Optionally copies GitHub Actions workflows and native git hooks
+7. Saves preferences to `vibe.config.json` for reconfiguration
 
 ## Configuration
 
-Run `/vibe:setup` to launch the interactive wizard. It configures everything in 4 steps:
+### `/vibe:setup` Wizard
 
-### 1. Tech Stack
+The interactive wizard configures everything in 4 steps:
 
-```
-Which technologies does this project use?
+**Step 1 — Tech Stack**: TypeScript/NestJS, React/Next.js, Python/FastAPI, Terraform/AWS, Docker
 
-[ ] TypeScript / NestJS (backend)
-[ ] React / Next.js (frontend)
-[ ] Python / FastAPI
-[ ] Terraform / AWS (infra)
-[ ] Docker
-```
+**Step 2 — Security Level**: Basic (rules only), Standard (+ hooks), Strict (+ full protection)
 
-### 2. Security Level
+**Step 3 — Integrations**: GitHub MCP, GitHub Actions, Context7 MCP, Sequential Thinking MCP
 
-```
-What security level do you want?
+**Step 4 — Skills**: Choose which `/vibe:*` skills to enable
 
-( ) Basic    — Rules only (no hooks)
-( ) Standard — Rules + block dangerous commands + post-edit lint
-( ) Strict   — Full protection: workflow guard, branch protection, secrets scan
-```
-
-### 3. Integrations
-
-```
-Which integrations to enable?
-
-[ ] GitHub MCP (PRs, issues from Claude)
-[ ] GitHub Actions (PR review, security review, issue handler)
-[ ] Context7 MCP (contextual documentation)
-[ ] Sequential Thinking MCP
-```
-
-### 4. Skills Selection
-
-Choose which `/vibe:*` skills to activate.
-
-Configuration is saved to `vibe.config.json` (gitignored, per-project).
+Configuration is saved to `vibe.config.json` (gitignored, per-project). Run `/vibe:setup` again to reconfigure.
 
 ## Security Levels
 
-| Feature | Basic | Standard | Strict |
-| --- | :---: | :---: | :---: |
-| Rules in `.claude/rules/` | Yes | Yes | Yes |
-| Block dangerous commands | — | Yes | Yes |
-| Post-edit auto-format | — | Yes | Yes |
-| Workflow guard (branch/commit) | — | — | Yes |
-| Branch protection (Edit/Write) | — | — | Yes |
-| Secret scanning on commit | — | — | Yes |
-| Stop verification prompt | — | — | Yes |
-| Native git hooks | — | — | Yes |
-| Session startup validation | — | — | Yes |
+| Feature                        | Basic | Standard | Strict |
+| ------------------------------ | :---: | :------: | :----: |
+| Rules in `.claude/rules/`      |  Yes  |   Yes    |  Yes   |
+| Block dangerous commands       |   —   |   Yes    |  Yes   |
+| Post-edit auto-format          |   —   |   Yes    |  Yes   |
+| Workflow guard (branch/commit) |   —   |    —     |  Yes   |
+| Branch protection (Edit/Write) |   —   |    —     |  Yes   |
+| Secret scanning on commit      |   —   |    —     |  Yes   |
+| Stop verification prompt       |   —   |    —     |  Yes   |
+| Native git hooks               |   —   |    —     |  Yes   |
+| Session startup validation     |   —   |    —     |  Yes   |
 
 ## Plugin Skills
 
-| Skill | Description | Model |
-| --- | --- | --- |
-| `/vibe:setup` | Interactive configuration wizard | — |
-| `/vibe:review-security` | OWASP-based security review | Opus |
-| `/vibe:deploy-check` | Pre-deployment verification checklist | Sonnet |
-| `/vibe:fix-issue <number>` | Fix GitHub issue with tests | Opus |
-| `/vibe:refactor <path>` | Refactor preserving behavior | Sonnet |
-| `/vibe:create-pr [base]` | Structured PR creation | — |
-| `/vibe:test <path>` | Generate and run tests | — |
-| `/vibe:health-check` | Validate plugin configuration | — |
-| `/vibe:whats-new` | Check Claude Code updates | — |
+| Skill                      | Description                           | Model  |
+| -------------------------- | ------------------------------------- | ------ |
+| `/vibe:setup`              | Interactive configuration wizard      | —      |
+| `/vibe:review-security`    | OWASP-based security review           | Opus   |
+| `/vibe:deploy-check`       | Pre-deployment verification checklist | Sonnet |
+| `/vibe:fix-issue <number>` | Fix GitHub issue with tests           | Opus   |
+| `/vibe:refactor <path>`    | Refactor preserving behavior          | Sonnet |
+| `/vibe:create-pr [base]`   | Structured PR creation                | —      |
+| `/vibe:test <path>`        | Generate and run tests                | —      |
+| `/vibe:health-check`       | Validate plugin configuration         | —      |
+| `/vibe:whats-new`          | Check Claude Code updates             | —      |
 
 ### Bundled Skills (built into Claude Code)
 
-| Skill | Description |
-| --- | --- |
-| `/simplify` | Review changed code for reuse and efficiency |
-| `/batch <instruction>` | Orchestrate parallel changes across codebase |
-| `/loop [interval] <prompt>` | Run recurring prompts on schedule |
-| `/debug [description]` | Troubleshoot Claude Code session |
-| `/claude-api` | Claude API reference for building apps |
+| Skill                       | Description                                  |
+| --------------------------- | -------------------------------------------- |
+| `/simplify`                 | Review changed code for reuse and efficiency |
+| `/batch <instruction>`      | Orchestrate parallel changes across codebase |
+| `/loop [interval] <prompt>` | Run recurring prompts on schedule            |
+| `/debug [description]`      | Troubleshoot Claude Code session             |
+| `/claude-api`               | Claude API reference for building apps       |
 
 ## Hooks
 
-| Hook | Trigger | Action |
-| --- | --- | --- |
-| `block-dangerous-commands.sh` | Pre-Bash | Blocks `rm -rf /`, `DROP TABLE`, force push to main, `chmod 777`, `terraform destroy -auto-approve`, `curl\|bash` |
-| `workflow-guard.sh` | Pre-Bash | Blocks commit on main/master/develop, `--no-verify`, bad branch names, non-conventional commits, secrets in staged diff |
-| `branch-guard.sh` | Pre-Edit/Write | Blocks file modifications on main/master/develop |
-| `post-edit-lint.sh` | Post-Edit/Write | Auto-formats: Prettier (JS/TS/JSON/MD), ruff (Python), `terraform fmt` (.tf) |
-| `validate-config.sh` | SessionStart | Lightweight config validation (<100ms, non-blocking) |
-| Stop prompt | On stop | Verifies tests passed, no security issues, conventions followed |
-| `git-hooks/pre-commit` | Native git | Branch protection + secret detection (works outside Claude too) |
-| `git-hooks/commit-msg` | Native git | Conventional commit validation (works outside Claude too) |
+| Hook                          | Trigger         | What it blocks                                                                                                   |
+| ----------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `block-dangerous-commands.sh` | Pre-Bash        | `rm -rf /`, `DROP TABLE`, force push, `chmod 777`, `terraform destroy -auto-approve`, `curl\|bash`               |
+| `workflow-guard.sh`           | Pre-Bash        | Commit on main/master/develop, `--no-verify`, bad branch names, non-conventional commits, secrets in staged diff |
+| `branch-guard.sh`             | Pre-Edit/Write  | File modifications on main/master/develop                                                                        |
+| `post-edit-lint.sh`           | Post-Edit/Write | _(formats)_ Prettier (JS/TS/JSON/MD), ruff (Python), `terraform fmt` (.tf)                                       |
+| `validate-config.sh`          | SessionStart    | _(validates)_ CLAUDE.md, rules, settings, vibe.config.json                                                       |
+| Stop prompt                   | On stop         | _(verifies)_ Tests passed, no security issues, conventions followed                                              |
+| `git-hooks/pre-commit`        | Native git      | Branch protection + secret detection (works outside Claude)                                                      |
+| `git-hooks/commit-msg`        | Native git      | Conventional commit validation (works outside Claude)                                                            |
 
 ## Specialized Agents
 
-| Agent | Purpose |
-| --- | --- |
-| `code-reviewer` | Reviews `git diff` against rules — security → correctness → architecture → quality |
+| Agent              | Purpose                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| `code-reviewer`    | Reviews `git diff` against rules — security, correctness, architecture, quality            |
 | `ecommerce-expert` | Dafiti domain: catalog, cart/checkout, payments (PIX, Boleto, credit card), shipping, LGPD |
-| `infra-reviewer` | Terraform modules, Docker security, AWS IAM/S3/VPC, cost optimization |
+| `infra-reviewer`   | Terraform modules, Docker security, AWS IAM/S3/VPC, cost optimization                      |
 
 ## MCP Servers
 
-| Server | Purpose | Auth |
-| --- | --- | --- |
-| GitHub | Repo management, issues, PRs from Claude | `GITHUB_TOKEN` |
-| Context7 | Up-to-date library documentation | None |
-| Sequential Thinking | Structured reasoning for complex problems | None |
+| Server              | Purpose                                   | Auth           |
+| ------------------- | ----------------------------------------- | -------------- |
+| GitHub              | Repo management, issues, PRs from Claude  | `GITHUB_TOKEN` |
+| Context7            | Up-to-date library documentation          | None           |
+| Sequential Thinking | Structured reasoning for complex problems | None           |
 
 ## Two-Tier Architecture
 
 ### Tier 1: Rules (always loaded, ~150 lines)
 
-Files in `.claude/rules/` are loaded eagerly at startup. Lean "Always/Never" directives:
+Files in `.claude/rules/` — lean "Always/Never" directives. Loaded eagerly at startup.
 
-| File | Lines | Scope |
-| --- | --- | --- |
-| `security.md` | ~15 | Injection, auth, LGPD, XSS |
-| `backend.md` | ~12 | TypeScript, NestJS, Python, DB |
-| `frontend.md` | ~11 | React, Next.js, state management |
-| `infra.md` | ~11 | Docker, Terraform, AWS |
-| `quality.md` | ~13 | Testing, git, API, observability |
+| File          | Scope                                             |
+| ------------- | ------------------------------------------------- |
+| `security.md` | Injection, auth, LGPD, XSS, CSRF, secrets         |
+| `backend.md`  | TypeScript strict, hexagonal arch, DI, logging    |
+| `frontend.md` | React hooks, Server Components, accessibility     |
+| `infra.md`    | Docker multi-stage, Terraform modules, IAM        |
+| `quality.md`  | Testing 80%, conventional commits, PRs <400 lines |
 
-**Total startup cost: ~2,600 tokens** — leaves 197,000+ tokens for actual work.
+**Total startup cost: ~2,600 tokens** — leaves 197,000+ for actual work.
 
 ### Tier 2: Standards (on-demand, detailed)
 
-Files in `docs/standards/` contain full patterns with code examples. Claude reads them when working on specific tech:
+Files in `docs/standards/` — full patterns with code examples. Claude reads them when working on specific tech:
 
-| File | Covers |
-| --- | --- |
-| `typescript.md` | Strict mode, Zod, error classes, discriminated unions |
-| `nestjs.md` | Hexagonal arch, Controllers, DTOs, Guards, Interceptors |
-| `react-nextjs.md` | Hooks, TanStack Query, Zustand, Server Components |
-| `python.md` | Type hints, Pydantic v2, async, structlog, FastAPI |
-| `docker.md` | Multi-stage builds, compose, non-root, healthchecks |
-| `terraform.md` | Module structure, remote state, tagging, workspaces |
-| `aws.md` | IAM, S3, VPC, Secrets Manager, CloudWatch |
-| `database.md` | TypeORM, Prisma, SQLAlchemy, Redis cache-aside |
-| `llm-ai.md` | Prompts, RAG, embeddings, guardrails, evals |
-| `observability.md` | pino, structlog, OpenTelemetry, RED metrics |
-| `api-design.md` | REST, pagination, errors, rate limiting, idempotency |
-| `testing.md` | Vitest, pytest, mocking, testcontainers, Playwright |
+`typescript.md` `nestjs.md` `react-nextjs.md` `python.md` `docker.md` `terraform.md` `aws.md` `database.md` `llm-ai.md` `observability.md` `api-design.md` `testing.md`
 
-## Health Check (3 layers of resilience)
+## Health Check — 3 Layers of Resilience
 
-### Layer 1: CI/CD — `validate-plugin.yml`
-
-- Runs on every push to `skills/`, `hooks/`, `agents/`, `.claude-plugin/`
-- Validates: JSON files, YAML frontmatter, script permissions, agent files
-- Weekly cron: checks for new Claude Code versions, creates issue with `claude-update` label
-
-### Layer 2: On-demand — `/vibe:health-check`
-
-- Full validation of all 34+ components
-- Reports PASS/WARN/FAIL per component
-- Overall status: HEALTHY / NEEDS ATTENTION / BROKEN
-
-### Layer 3: Session startup — `validate-config.sh`
-
-- Runs at every session start via `SessionStart` hook
-- Lightweight (<100ms), non-blocking
-- Checks: CLAUDE.md, rules, settings.json, vibe.config.json
+| Layer     | What                  | When                     | Behavior                                                                             |
+| --------- | --------------------- | ------------------------ | ------------------------------------------------------------------------------------ |
+| CI/CD     | `validate-plugin.yml` | Every push + weekly cron | Validates JSON, frontmatter, scripts. Creates `claude-update` issue on version drift |
+| On-demand | `/vibe:health-check`  | Manual                   | Full 34-component validation with PASS/WARN/FAIL report                              |
+| Session   | `validate-config.sh`  | Every session start      | Lightweight (<100ms), non-blocking. Notifies if config is missing                    |
 
 ## Auto-updates
 
 Vibe tracks the installed Claude Code version in `.claude-code-version`.
 
-- **Weekly CI check**: `validate-plugin.yml` compares tracked vs latest npm version
-- **On-demand**: `/vibe:whats-new` searches for changelog and analyzes impact on Vibe config
-- **Manual update**: `/plugin marketplace update` pulls latest Vibe from marketplace
-
-When a new Claude Code version is detected with potential breaking changes, an issue is auto-created with the `claude-update` label.
+- **Weekly CI**: compares tracked vs latest npm version, creates issue on drift
+- **On-demand**: `/vibe:whats-new` checks changelog and analyzes impact on Vibe
+- **Plugin update**: `/plugin marketplace update` pulls latest Vibe
 
 ## GitHub Automation
 
-| Workflow | Trigger | Action |
-| --- | --- | --- |
-| `claude-pr-review.yml` | PR open/sync, @claude | Code review against rules and REVIEW.md |
-| `claude-security-review.yml` | PR open/sync | OWASP security scan + LGPD checks |
-| `claude-issue-handler.yml` | Labels, @claude | Auto-fix/feature/refactor from issues |
-| `validate-plugin.yml` | Push to plugin files, weekly | Plugin structure validation + version tracking |
+| Workflow                     | Trigger                      | Action                                  |
+| ---------------------------- | ---------------------------- | --------------------------------------- |
+| `claude-pr-review.yml`       | PR open/sync, @claude        | Code review against rules and REVIEW.md |
+| `claude-security-review.yml` | PR open/sync                 | OWASP security scan + LGPD checks       |
+| `claude-issue-handler.yml`   | Labels, @claude              | Auto-fix/feature/refactor from issues   |
+| `validate-plugin.yml`        | Push to plugin files, weekly | Plugin structure + version validation   |
 
 ### Setup
 
-Add `CLAUDE_CODE_OAUTH_TOKEN` to your GitHub repo secrets:
-
 ```
-Settings → Secrets and variables → Actions → New repository secret
+GitHub repo → Settings → Secrets → Actions → New repository secret
 Name: CLAUDE_CODE_OAUTH_TOKEN
-Value: (from `claude setup-token`)
+Value: (run `claude setup-token` to generate)
 ```
 
 ## For Admins
@@ -237,145 +297,97 @@ Deploy `managed-settings.json` to restrict to Dafiti-approved plugins only:
 ```json
 {
   "strictKnownMarketplaces": [
-    {
-      "source": "github",
-      "repo": "dafiti-group/vibe"
-    },
-    {
-      "source": "hostPattern",
-      "hostPattern": "^github\\.com/dafiti-group/"
-    }
+    { "source": "github", "repo": "dafiti-group/vibe" },
+    { "source": "hostPattern", "hostPattern": "^github\\.com/dafiti-group/" }
   ],
   "pluginTrustMessage": "Solo plugins aprobados por AI Core Team — Dafiti."
 }
 ```
 
-This blocks any marketplace not from `dafiti-group`. Cannot be overridden by users.
+Blocks any marketplace not from `dafiti-group`. Cannot be overridden.
+
+### Auto-discovery
+
+`/vibe:setup` adds marketplace config to each project's `.claude/settings.json`. New team members get prompted to install Vibe automatically when they open a configured project.
 
 ### Auth Requirement
 
 Each developer needs `GITHUB_TOKEN` or `gh auth login` for the private marketplace.
 
-### Auto-discovery
-
-When `/vibe:setup` runs, it adds to the project's `.claude/settings.json`:
-
-```json
-{
-  "extraKnownMarketplaces": {
-    "dafiti-tools": {
-      "source": { "source": "github", "repo": "dafiti-group/vibe" }
-    }
-  },
-  "enabledPlugins": {
-    "vibe@dafiti-tools": true
-  }
-}
-```
-
-New team members opening the project get prompted to install Vibe automatically.
-
 ## Contributing
 
-### Adding a new skill
+### Adding a skill
 
-1. Create `skills/my-skill/SKILL.md` with YAML frontmatter:
-
-```yaml
----
-name: my-skill
-description: What this skill does
-argument-hint: "<arg>"
-allowed-tools: Read, Grep, Glob, Bash
----
-```
-
-2. Add the skill path to `.claude-plugin/plugin.json` → `skills` array
+1. Create `skills/my-skill/SKILL.md` with YAML frontmatter
+2. Add path to `.claude-plugin/plugin.json` → `skills` array
 3. Run `/vibe:health-check` to validate
 4. Submit PR
 
-### Adding a new hook
+### Adding a hook
 
-1. Create `hooks/my-hook.sh` (must read stdin, output JSON `{"decision":"allow"}` or `{"decision":"deny","reason":"..."}`)
+1. Create `hooks/my-hook.sh` (stdin → JSON `{"decision":"allow"|"deny"}`)
 2. Add to `hooks/hooks.json` under the appropriate event
-3. Make executable: `chmod +x hooks/my-hook.sh`
+3. `chmod +x hooks/my-hook.sh`
 4. Submit PR
 
-### Adding a new agent
+### Adding an agent
 
-1. Create `agents/my-agent.md` with role description, behavior, and output format
-2. Add the agent path to `.claude-plugin/plugin.json` → `agents` array
+1. Create `agents/my-agent.md` with role, behavior, output format
+2. Add path to `.claude-plugin/plugin.json` → `agents` array
 3. Submit PR
 
 ## Plugin Architecture
 
 ```
 vibe/
-├── .claude-plugin/              # Plugin manifest + marketplace catalog
+├── .claude-plugin/              # Plugin manifest + marketplace
 │   ├── plugin.json
 │   └── marketplace.json
-├── skills/                      # 9 plugin skills
-│   ├── setup/                   # Interactive wizard + templates
+├── skills/                      # 9 plugin skills (/vibe:*)
+│   ├── setup/                   # Interactive wizard
 │   │   ├── SKILL.md
 │   │   └── templates/           # CLAUDE.md, rules, mcp, settings, workflows
-│   ├── review-security/
-│   ├── deploy-check/
-│   ├── fix-issue/
-│   ├── refactor/
-│   ├── create-pr/
-│   ├── test/
-│   ├── health-check/            # + scripts/validate.sh
-│   └── whats-new/
+│   ├── review-security/         # OWASP security review
+│   ├── deploy-check/            # Pre-deployment checklist
+│   ├── fix-issue/               # GitHub issue fixer
+│   ├── refactor/                # Behavior-preserving refactor
+│   ├── create-pr/               # Structured PR creation
+│   ├── test/                    # Test generation + execution
+│   ├── health-check/            # Plugin validation
+│   │   └── scripts/validate.sh
+│   └── whats-new/               # Claude Code update checker
 ├── agents/                      # 3 specialized agents
 │   ├── code-reviewer.md
 │   ├── ecommerce-expert.md
 │   └── infra-reviewer.md
-├── hooks/                       # Hook scripts + config
-│   ├── hooks.json               # Centralized hook definitions
+├── hooks/                       # Safety hooks
+│   ├── hooks.json               # Hook definitions (plugin-level)
 │   ├── block-dangerous-commands.sh
 │   ├── workflow-guard.sh
 │   ├── branch-guard.sh
 │   ├── post-edit-lint.sh
 │   ├── validate-config.sh
-│   └── git-hooks/               # Native git hooks
+│   └── git-hooks/               # Native git hooks (all clients)
 │       ├── pre-commit
 │       └── commit-msg
-├── docs/standards/              # 12 detailed standard files
+├── docs/standards/              # 12 detailed coding standards
 ├── .claude/rules/               # 5 lean rule files (always loaded)
 ├── .github/workflows/           # 4 CI/CD workflows
 ├── settings.json                # Plugin-level default permissions
-├── CLAUDE.md                    # Main configuration hub
+├── CLAUDE.md                    # Configuration hub
 ├── REVIEW.md                    # Code review guidelines
 ├── .claude-code-version         # Version tracker
-└── LICENSE                      # MIT
+└── LICENSE
 ```
 
-## Context Management Tips
-
-- **`/compact`** — Run proactively during long sessions to compress context
-- **`/clear`** — Use between unrelated tasks to start fresh
-- **`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=90`** — Auto-compact at 90% context usage
-- **Subdirectory CLAUDE.md** — For monorepos, create per-service CLAUDE.md files
-
-## Using with Other AI Tools
+## Using Standards with Other AI Tools
 
 The `docs/standards/` files are pure markdown, reusable by any AI coding tool:
 
-- **Cursor** — Add `docs/standards/` to `.cursorrules` or `.cursor/rules/`
+- **Cursor** — Add to `.cursorrules` or `.cursor/rules/`
 - **GitHub Copilot** — Reference in `.github/copilot-instructions.md`
 - **Windsurf** — Add to `.windsurfrules`
 - **Codex** — Reference in `AGENTS.md`
-
-## Tech Stack
-
-| Layer | Technologies |
-| --- | --- |
-| Backend | TypeScript, NestJS, Python, FastAPI |
-| Frontend | React, Next.js (App Router), TanStack Query, Zustand |
-| Data/ML | Python, Pydantic, LangChain |
-| Infra | Docker, Terraform, AWS (S3, IAM, VPC, ECS), CloudFormation |
-| Testing | Vitest, Jest, pytest, Playwright |
-| Observability | pino, structlog, OpenTelemetry |
 
 ## License
 
