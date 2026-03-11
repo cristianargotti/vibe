@@ -9,14 +9,13 @@ INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
 if [ -z "$COMMAND" ]; then
-  echo '{"decision":"allow"}'
   exit 0
 fi
 
 deny() {
   local reason
   reason=$(echo "$1" | sed 's/\\/\\\\/g; s/"/\\"/g')
-  echo "{\"decision\":\"deny\",\"reason\":\"${reason}\"}"
+  echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"${reason}\"}}"
   exit 0
 }
 
@@ -82,4 +81,4 @@ if echo "$COMMAND" | grep -qE 'git[[:space:]]+commit\b'; then
   fi
 fi
 
-echo '{"decision":"allow"}'
+exit 0

@@ -12,7 +12,7 @@ HOOK="hooks/branch-guard.sh"
     skip "currently on protected branch"
   fi
   result=$(echo '{"tool_input":{"file_path":"test.ts","new_string":"hello"}}' | "$HOOK")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: any stdin content on feature branch" {
@@ -21,7 +21,7 @@ HOOK="hooks/branch-guard.sh"
     skip "currently on protected branch"
   fi
   result=$(echo '{}' | "$HOOK")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 # Note: Testing "deny on main" requires actually being on main,

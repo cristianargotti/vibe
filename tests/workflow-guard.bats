@@ -17,27 +17,27 @@ run_hook() {
 
 @test "allows: empty command" {
   result=$(echo '{"tool_input":{}}' | "$HOOK")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: git status" {
   result=$(run_hook "git status")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: git diff" {
   result=$(run_hook "git diff HEAD~1")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: git log" {
   result=$(run_hook "git log --oneline -5")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: npm test" {
   result=$(run_hook "npm test")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 # --- Branch Protection (commit on protected branches) ---
@@ -48,83 +48,83 @@ run_hook() {
     skip "currently on protected branch"
   fi
   result=$(run_hook 'git commit -m "feat: test commit"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 # --- --no-verify blocking ---
 
 @test "blocks: git commit --no-verify" {
   result=$(run_hook 'git commit --no-verify -m "bad commit"')
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
   [[ "$result" == *"--no-verify"* ]]
 }
 
 @test "blocks: git push --no-verify" {
   result=$(run_hook "git push --no-verify")
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
 }
 
 @test "blocks: npm run test --no-verify" {
   result=$(run_hook "npm run test --no-verify")
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
 }
 
 # --- Branch Naming ---
 
 @test "allows: git checkout -b feat/new-feature" {
   result=$(run_hook "git checkout -b feat/new-feature")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: git checkout -b fix/bug-123" {
   result=$(run_hook "git checkout -b fix/bug-123")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: git checkout -b chore/update-deps" {
   result=$(run_hook "git checkout -b chore/update-deps")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: git checkout -b docs/api-docs" {
   result=$(run_hook "git checkout -b docs/api-docs")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: git checkout -b test/add-unit-tests" {
   result=$(run_hook "git checkout -b test/add-unit-tests")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: git checkout -b refactor/auth-module" {
   result=$(run_hook "git checkout -b refactor/auth-module")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: git switch -c feat/new-feature" {
   result=$(run_hook "git switch -c feat/new-feature")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "blocks: git checkout -b bad-branch-name" {
   result=$(run_hook "git checkout -b bad-branch-name")
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
   [[ "$result" == *"must start with"* ]]
 }
 
 @test "blocks: git checkout -b my-feature" {
   result=$(run_hook "git checkout -b my-feature")
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
 }
 
 @test "blocks: git switch -c random-name" {
   result=$(run_hook "git switch -c random-name")
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
 }
 
 @test "blocks: git checkout -b FEAT/uppercase" {
   result=$(run_hook "git checkout -b FEAT/uppercase")
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
 }
 
 # --- Conventional Commits ---
@@ -133,91 +133,91 @@ run_hook() {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "feat: add user authentication"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: fix(scope): description" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "fix(auth): resolve token expiration"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: refactor!: breaking change" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "refactor!: restructure API endpoints"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: docs: update readme" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "docs: update readme"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: test: add unit tests" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "test: add unit tests"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: chore: update deps" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "chore: update dependencies"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: style: format code" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "style: format code"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: perf: optimize query" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "perf: optimize database query"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: ci: update workflow" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "ci: update workflow"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: build: update config" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "build: update config"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: revert: undo change" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "revert: undo change"')
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "allows: Merge commit" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook "git commit -m 'Merge branch feat/something into develop'")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }
 
 @test "blocks: non-conventional commit" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "added new feature"')
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
   [[ "$result" == *"conventional commits"* ]]
 }
 
@@ -225,26 +225,26 @@ run_hook() {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "feat:no space"')
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
 }
 
 @test "blocks: uppercase type" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "FEAT: uppercase"')
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
 }
 
 @test "blocks: random commit message" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook 'git commit -m "wip stuff"')
-  [[ "$result" == *'"decision":"deny"'* ]]
+  [[ "$result" == *'"permissionDecision":"deny"'* ]]
 }
 
 @test "allows: single-quoted commit message" {
   BRANCH=$(git rev-parse --abbrev-ref HEAD)
   if [[ "$BRANCH" =~ ^(main|master|develop)$ ]]; then skip; fi
   result=$(run_hook "git commit -m 'feat: single quoted'")
-  [[ "$result" == '{"decision":"allow"}' ]]
+  [[ -z "$result" ]]
 }

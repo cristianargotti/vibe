@@ -11,7 +11,6 @@ INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
 if [ -z "$COMMAND" ]; then
-  echo '{"decision":"allow"}'
   exit 0
 fi
 
@@ -21,7 +20,7 @@ check_pattern() {
   local reason
   reason=$(echo "$2" | sed 's/\\/\\\\/g; s/"/\\"/g')
   if echo "$COMMAND" | grep -qiE "$pattern"; then
-    echo "{\"decision\":\"deny\",\"reason\":\"${reason}\"}"
+    echo "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"${reason}\"}}"
     exit 0
   fi
 }
@@ -56,4 +55,4 @@ check_pattern 'curl[[:space:]]+.*\|[[:space:]]*(bash|sh|zsh)' "Blocked: piping c
 check_pattern 'wget[[:space:]]+.*\|[[:space:]]*(bash|sh|zsh)' "Blocked: piping wget to shell is a security risk"
 
 # If no dangerous patterns matched, allow the command
-echo '{"decision":"allow"}'
+exit 0
