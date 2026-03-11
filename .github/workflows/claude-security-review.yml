@@ -7,6 +7,10 @@ on:
 jobs:
   security-review:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: claude-security-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     permissions:
       contents: read
       pull-requests: write

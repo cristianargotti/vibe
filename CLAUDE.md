@@ -36,8 +36,8 @@ terraform validate    # Validate Terraform config
 
 ## Conventions
 
-- Conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`
-- Branch naming: `feat/`, `fix/`, `chore/`
+- Conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `style:`, `perf:`, `ci:`, `build:`, `revert:`
+- Branch naming: `feat/`, `fix/`, `chore/`, `docs/`, `test/`, `refactor/`
 - PRs: under 400 lines, one concern per PR
 - Testing: 80% coverage minimum, 100% on critical paths
 
@@ -74,15 +74,18 @@ When working on a specific technology, read the relevant file in `docs/standards
 - Encrypt PII at rest (LGPD compliance)
 - Run `npm audit` / `pip audit` before deploying
 
-## Available Skills
+## Commands
+
+- `/create-pr [base]` — Create structured PR
+- `/test <path>` — Generate and run tests
+
+## Skills
 
 - `/review-security` — OWASP-based security review
 - `/fix-issue <number>` — Analyze and fix GitHub issue
-- `/create-pr [base]` — Create structured PR
 - `/refactor <path>` — Refactor with behavior preservation
-- `/test <path>` — Generate and run tests
 - `/deploy-check` — Pre-deployment verification checklist
-- `/simplify` — Review changed code for reuse and efficiency
+- `/simplify` — Review changed code for reuse and efficiency (built-in)
 
 ## GitHub Automation
 

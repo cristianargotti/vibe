@@ -27,8 +27,7 @@ format_file() {
       ;;
     py)
       if command -v ruff &>/dev/null; then
-        ruff format "$FILE_PATH" 2>/dev/null &
-        ruff check --fix "$FILE_PATH" 2>/dev/null &
+        ruff format "$FILE_PATH" 2>/dev/null && ruff check --fix "$FILE_PATH" 2>/dev/null &
       fi
       ;;
     tf|tfvars)

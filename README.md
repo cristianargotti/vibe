@@ -27,6 +27,7 @@ rm -rf /tmp/vibe
 ```
 
 The setup script will:
+
 - Copy `.claude/`, `hooks/`, `docs/standards/`, `.github/`, `CLAUDE.md`, `REVIEW.md`, `.mcp.json`
 - Smart-merge your `.gitignore` (append missing entries)
 - Add ESLint/Prettier to your `package.json`
@@ -41,13 +42,13 @@ Vibe uses a performance-optimized two-tier system to keep Claude's context budge
 
 Files in `.claude/rules/` are loaded **eagerly at startup**. They contain lean "Always/Never" directives — no code examples, no verbose explanations:
 
-| File | Lines | Scope |
-|------|-------|-------|
-| `security.md` | ~15 | Injection, auth, LGPD, XSS |
-| `backend.md` | ~12 | TypeScript, NestJS, Python, DB |
-| `frontend.md` | ~11 | React, Next.js, state management |
-| `infra.md` | ~11 | Docker, Terraform, AWS |
-| `quality.md` | ~13 | Testing, git, API, observability |
+| File          | Lines | Scope                            |
+| ------------- | ----- | -------------------------------- |
+| `security.md` | ~15   | Injection, auth, LGPD, XSS       |
+| `backend.md`  | ~12   | TypeScript, NestJS, Python, DB   |
+| `frontend.md` | ~11   | React, Next.js, state management |
+| `infra.md`    | ~11   | Docker, Terraform, AWS           |
+| `quality.md`  | ~13   | Testing, git, API, observability |
 
 **Total startup cost: ~2,600 tokens** — leaves 197,000+ tokens for actual work.
 
@@ -55,72 +56,82 @@ Files in `.claude/rules/` are loaded **eagerly at startup**. They contain lean "
 
 Files in `docs/standards/` contain **full patterns with code examples**. Claude reads them when working on specific tech:
 
-| File | Covers |
-|------|--------|
-| `typescript.md` | Strict mode, Zod, error classes, discriminated unions |
-| `nestjs.md` | Hexagonal arch, Controllers, DTOs, Guards, Interceptors |
-| `react-nextjs.md` | Hooks, TanStack Query, Zustand, Server Components |
-| `python.md` | Type hints, Pydantic v2, async, structlog, FastAPI |
-| `docker.md` | Multi-stage builds, compose, non-root, healthchecks |
-| `terraform.md` | Module structure, remote state, tagging, workspaces |
-| `aws.md` | IAM, S3, VPC, Secrets Manager, CloudWatch |
-| `database.md` | TypeORM, Prisma, SQLAlchemy, Redis cache-aside |
-| `llm-ai.md` | Prompts, RAG, embeddings, guardrails, evals |
-| `observability.md` | pino, structlog, OpenTelemetry, RED metrics |
-| `api-design.md` | REST, pagination, errors, rate limiting, idempotency |
-| `testing.md` | Vitest, pytest, mocking, testcontainers, Playwright |
+| File               | Covers                                                  |
+| ------------------ | ------------------------------------------------------- |
+| `typescript.md`    | Strict mode, Zod, error classes, discriminated unions   |
+| `nestjs.md`        | Hexagonal arch, Controllers, DTOs, Guards, Interceptors |
+| `react-nextjs.md`  | Hooks, TanStack Query, Zustand, Server Components       |
+| `python.md`        | Type hints, Pydantic v2, async, structlog, FastAPI      |
+| `docker.md`        | Multi-stage builds, compose, non-root, healthchecks     |
+| `terraform.md`     | Module structure, remote state, tagging, workspaces     |
+| `aws.md`           | IAM, S3, VPC, Secrets Manager, CloudWatch               |
+| `database.md`      | TypeORM, Prisma, SQLAlchemy, Redis cache-aside          |
+| `llm-ai.md`        | Prompts, RAG, embeddings, guardrails, evals             |
+| `observability.md` | pino, structlog, OpenTelemetry, RED metrics             |
+| `api-design.md`    | REST, pagination, errors, rate limiting, idempotency    |
+| `testing.md`       | Vitest, pytest, mocking, testcontainers, Playwright     |
 
 ## Available Skills & Commands
 
 ### Commands (stable)
-| Command | Description |
-|---------|-------------|
+
+| Command             | Description                                                |
+| ------------------- | ---------------------------------------------------------- |
 | `/create-pr [base]` | Analyze diff, generate PR with title/description/test plan |
-| `/test <path>` | Generate tests (happy/edge/error), run and report coverage |
+| `/test <path>`      | Generate tests (happy/edge/error), run and report coverage |
 
 ### Skills (advanced features)
-| Skill | Model | Features | Description |
-|-------|-------|----------|-------------|
-| `/review-security` | Opus | context:fork | OWASP-based security review |
-| `/fix-issue <number>` | Opus | — | Read GitHub issue, implement fix, add tests |
-| `/refactor <path>` | Sonnet | context:fork | Refactor preserving behavior, verify with tests |
-| `/deploy-check` | Sonnet | — | Pre-deployment verification checklist |
+
+| Skill                 | Model  | Features     | Description                                     |
+| --------------------- | ------ | ------------ | ----------------------------------------------- |
+| `/review-security`    | Opus   | context:fork | OWASP-based security review                     |
+| `/fix-issue <number>` | Opus   | —            | Read GitHub issue, implement fix, add tests     |
+| `/refactor <path>`    | Sonnet | context:fork | Refactor preserving behavior, verify with tests |
+| `/deploy-check`       | Sonnet | —            | Pre-deployment verification checklist           |
 
 ## Specialized Agents
 
-| Agent | Purpose |
-|-------|---------|
-| `code-reviewer` | Reviews `git diff` against rules and standards |
+| Agent              | Purpose                                                           |
+| ------------------ | ----------------------------------------------------------------- |
+| `code-reviewer`    | Reviews `git diff` against rules and standards                    |
 | `ecommerce-expert` | Dafiti domain expert: catalog, cart, payments (PIX, Boleto), LGPD |
-| `infra-reviewer` | Terraform, Docker security, AWS cost optimization |
+| `infra-reviewer`   | Terraform, Docker security, AWS cost optimization                 |
 
 ## Hooks
 
-| Hook | Trigger | Action |
-|------|---------|--------|
-| `block-dangerous-commands.sh` | Pre-Bash | Blocks `rm -rf /`, `DROP TABLE`, force push to main, `chmod 777`, etc. |
-| `post-edit-lint.sh` | Post-Edit/Write | Auto-formats: Prettier (JS/TS), ruff (Python), `terraform fmt` (.tf) |
-| Stop prompt | On stop | Verifies tests passed, no security issues, conventions followed |
+| Hook                          | Trigger         | Action                                                                                    |
+| ----------------------------- | --------------- | ----------------------------------------------------------------------------------------- |
+| `block-dangerous-commands.sh` | Pre-Bash        | Blocks `rm -rf /`, `DROP TABLE`, force push to main, `chmod 777`, etc.                    |
+| `workflow-guard.sh`           | Pre-Bash        | Blocks commit on main, `--no-verify`, bad branch names, non-conventional commits, secrets |
+| `branch-guard.sh`             | Pre-Edit/Write  | Blocks file modifications on main/master/develop                                          |
+| `post-edit-lint.sh`           | Post-Edit/Write | Auto-formats: Prettier (JS/TS), ruff (Python), `terraform fmt` (.tf)                      |
+| `git-hooks/pre-commit`        | Native git      | Branch protection + secret detection for all git clients                                  |
+| `git-hooks/commit-msg`        | Native git      | Conventional commit validation for all git clients                                        |
+| Stop prompt                   | On stop         | Verifies tests passed, no security issues, conventions followed                           |
 
 ## MCP Servers
 
-| Server | Purpose | API Key |
-|--------|---------|---------|
-| GitHub | Repo management, issues, PRs | `GITHUB_TOKEN` |
-| Context7 | Up-to-date library documentation | None needed |
-| Sequential Thinking | Structured reasoning for complex problems | None needed |
+| Server              | Purpose                                   | API Key        |
+| ------------------- | ----------------------------------------- | -------------- |
+| GitHub              | Repo management, issues, PRs              | `GITHUB_TOKEN` |
+| Context7            | Up-to-date library documentation          | None needed    |
+| Sequential Thinking | Structured reasoning for complex problems | None needed    |
 
 ## GitHub Automation
 
 ### Workflows
+
 - **claude-pr-review.yml** — Automatic code review on PR open/sync and @claude mentions
 - **claude-security-review.yml** — Security scan on every PR
 - **claude-issue-handler.yml** — Handles @claude mentions + labels (`claude-fix`, `claude-feature`, `claude-refactor`)
 
 ### Setup
-Add `ANTHROPIC_API_KEY` to your GitHub repo secrets:
+
+Add `CLAUDE_CODE_OAUTH_TOKEN` to your GitHub repo secrets (from `claude setup-token`):
+
 ```
 Settings → Secrets and variables → Actions → New repository secret
+Name: CLAUDE_CODE_OAUTH_TOKEN
 ```
 
 ## Context Management Tips
@@ -131,6 +142,7 @@ Settings → Secrets and variables → Actions → New repository secret
 - **Subdirectory CLAUDE.md** — For monorepos, create a `CLAUDE.md` in each service directory with service-specific instructions
 
 ### Built-in Skills Reference
+
 - `/batch` — Process multiple files with the same operation
 - `/simplify` — Review changed code for reuse, quality, and efficiency
 
@@ -146,14 +158,14 @@ The `docs/standards/` files are pure markdown, reusable by any AI coding tool:
 
 ## Tech Stack
 
-| Layer | Technologies |
-|-------|-------------|
-| Backend | TypeScript, NestJS, Python, FastAPI |
-| Frontend | React, Next.js (App Router), TanStack Query, Zustand |
-| Data/ML | Python, Pydantic, LangChain |
-| Infra | Docker, Terraform, AWS (S3, IAM, VPC, ECS), CloudFormation |
-| Testing | Vitest, Jest, pytest, Playwright |
-| Observability | pino, structlog, OpenTelemetry |
+| Layer         | Technologies                                               |
+| ------------- | ---------------------------------------------------------- |
+| Backend       | TypeScript, NestJS, Python, FastAPI                        |
+| Frontend      | React, Next.js (App Router), TanStack Query, Zustand       |
+| Data/ML       | Python, Pydantic, LangChain                                |
+| Infra         | Docker, Terraform, AWS (S3, IAM, VPC, ECS), CloudFormation |
+| Testing       | Vitest, Jest, pytest, Playwright                           |
+| Observability | pino, structlog, OpenTelemetry                             |
 
 ## License
 

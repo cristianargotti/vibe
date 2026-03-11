@@ -3,8 +3,8 @@
 Always write tests. Minimum 80% coverage, 100% on critical paths (auth, payments, checkout).
 Always use Arrange/Act/Assert pattern. One assertion per concept.
 Always mock external services. Never mock the unit under test.
-Always use conventional commits: feat:, fix:, refactor:, docs:, test:, chore:.
-Always use branch naming: feat/, fix/, chore/ prefixes.
+Always use conventional commits: feat:, fix:, refactor:, docs:, test:, chore:, style:, perf:, ci:, build:, revert:.
+Always use branch naming: feat/, fix/, chore/, docs/, test/, refactor/ prefixes.
 Always keep PRs under 400 lines changed. One concern per PR.
 Always use RESTful conventions: nouns for resources, HTTP verbs for actions.
 Always return standard error format: `{"error":{"code":"...","message":"..."}}`.

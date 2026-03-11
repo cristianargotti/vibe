@@ -1,13 +1,18 @@
 {
   "name": "vibe",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Claude Code configuration template for Dafiti engineering teams",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}'",
-    "format:check": "prettier --check '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}'"
+    "format:check": "prettier --check '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}'",
+    "test": "echo \"Configure test runner: npx vitest or jest\" && exit 0",
+    "build": "echo \"Configure build: tsc or next build\" && exit 0"
   },
   "devDependencies": {
     "eslint": "^9.0.0",

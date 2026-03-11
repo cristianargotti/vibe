@@ -31,6 +31,7 @@ else
 fi
 
 # --- Target directory setup ---
+mkdir -p "$TARGET_DIR"
 TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
 
 if [ "$TARGET_DIR" = "$SCRIPT_DIR" ]; then
@@ -40,7 +41,6 @@ if [ "$TARGET_DIR" = "$SCRIPT_DIR" ]; then
 fi
 
 info "Setting up in: $TARGET_DIR"
-mkdir -p "$TARGET_DIR"
 cd "$TARGET_DIR"
 
 # --- Git init if needed ---

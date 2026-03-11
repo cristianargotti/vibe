@@ -13,13 +13,19 @@ const messages = [
 Rules:
 - Respond ONLY with valid JSON matching the schema below.
 - If uncertain, set "confidence" below 0.5.
-Schema: { "category": string, "subcategory": string, "confidence": number }`
+Schema: { "category": string, "subcategory": string, "confidence": number }`,
   },
   // Few-shot examples improve consistency
-  { role: "user", content: "Classify: Nike Air Max 90 running shoe, men's size 42" },
-  { role: "assistant", content: '{"category":"Shoes","subcategory":"Running","confidence":0.95}' },
+  {
+    role: "user",
+    content: "Classify: Nike Air Max 90 running shoe, men's size 42",
+  },
+  {
+    role: "assistant",
+    content: '{"category":"Shoes","subcategory":"Running","confidence":0.95}',
+  },
   // Actual request
-  { role: "user", content: `Classify: ${productDescription}` }
+  { role: "user", content: `Classify: ${productDescription}` },
 ];
 ```
 
@@ -40,7 +46,7 @@ Wrap your reasoning in <thinking> tags. Only the JSON goes outside.`;
 ### Chunking Strategy
 
 ```python
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=512,
@@ -122,12 +128,12 @@ def retrieve(query: str, top_k: int = 10, rerank_top: int = 3) -> list[dict]:
 
 ## Model Selection Guide
 
-| Use Case | Model | Reason |
-|---|---|---|
-| Complex reasoning, code generation, architecture | Claude Opus | Highest accuracy, handles nuance |
-| Summarization, classification, chat | Claude Sonnet | Best cost/quality balance |
-| High-volume extraction, tagging, routing | Claude Haiku | Lowest latency and cost |
-| Embeddings | text-embedding-3-small | Optimized for vector search |
+| Use Case                                         | Model                  | Reason                           |
+| ------------------------------------------------ | ---------------------- | -------------------------------- |
+| Complex reasoning, code generation, architecture | Claude Opus            | Highest accuracy, handles nuance |
+| Summarization, classification, chat              | Claude Sonnet          | Best cost/quality balance        |
+| High-volume extraction, tagging, routing         | Claude Haiku           | Lowest latency and cost          |
+| Embeddings                                       | text-embedding-3-small | Optimized for vector search      |
 
 Rule of thumb: start with Sonnet, upgrade to Opus only when Sonnet measurably fails on your eval set. Use Haiku for anything that runs per-request at scale.
 
@@ -149,7 +155,10 @@ function parseClassification(raw: string) {
   const parsed = JSON.parse(raw);
   const result = ClassificationSchema.safeParse(parsed);
   if (!result.success) {
-    logger.warn({ errors: result.error.issues, raw }, "LLM output failed validation");
+    logger.warn(
+      { errors: result.error.issues, raw },
+      "LLM output failed validation",
+    );
     return null; // Fall back to manual classification
   }
   return result.data;

@@ -4,7 +4,7 @@
 
 ## Changes
 
-## <!-- Bullet list of specific changes -->
+<!-- Bullet list of specific changes -->
 
 -
 -

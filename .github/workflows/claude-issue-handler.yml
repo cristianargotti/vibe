@@ -9,9 +9,13 @@ on:
 jobs:
   handle-claude-labels:
     if: |
-      (github.event_name == 'issues' && startsWith(github.event.label.name, 'claude-')) ||
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
+      (github.event_name == 'issues' && (github.event.label.name == 'claude-fix' || github.event.label.name == 'claude-feature' || github.event.label.name == 'claude-refactor')) ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') && !github.event.issue.pull_request)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: claude-issue-${{ github.event.issue.number }}
+      cancel-in-progress: true
     permissions:
       contents: write
       issues: write
