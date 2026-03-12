@@ -70,6 +70,7 @@
       "Skill(vibe:setup)",
       "Skill(vibe:health-check)",
       "Skill(vibe:whats-new)",
+      "Skill(vibe:fix-vulnerabilities)",
       "Skill(simplify)"
     ],
     "deny": [

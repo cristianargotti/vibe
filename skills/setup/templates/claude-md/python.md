@@ -65,3 +65,4 @@ pip audit             # Security audit
 - `/vibe:test <path>` — Generate and run tests
 - `/vibe:health-check` — Validate plugin configuration
 - `/vibe:whats-new` — Check Claude Code updates
+- `/vibe:fix-vulnerabilities` — Fix Dependabot security vulnerabilities

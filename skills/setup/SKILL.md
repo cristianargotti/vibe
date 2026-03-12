@@ -65,6 +65,7 @@ Ask the user (use AskUserQuestion with multiSelect: true):
 - /vibe:deploy-check — Pre-deployment checklist
 - /vibe:fix-issue — Fix GitHub issues with tests
 - /vibe:create-pr — Structured PR creation
+- /vibe:fix-vulnerabilities — Fix Dependabot security vulnerabilities
 
 (Note: /vibe:setup, /vibe:health-check, /vibe:whats-new, /vibe:test, /vibe:refactor are always enabled)
 
@@ -133,6 +134,8 @@ Read `skills/setup/templates/mcp.json` and include only selected integrations.
 #### 5f. `.github/workflows/`
 
 If GitHub Actions was selected, copy workflow templates from `skills/setup/templates/github-workflows/`.
+
+If the user selected `/vibe:fix-vulnerabilities`, also copy `claude-fix-vulnerabilities.yml`.
 
 #### 5g. `docs/standards/`
 

@@ -58,3 +58,4 @@ docker compose up     # Run local stack
 - `/vibe:create-pr [base]` — Structured PR creation
 - `/vibe:health-check` — Validate plugin configuration
 - `/vibe:whats-new` — Check Claude Code updates
+- `/vibe:fix-vulnerabilities` — Fix Dependabot security vulnerabilities

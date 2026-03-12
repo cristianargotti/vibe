@@ -45,12 +45,12 @@
 
 # --- Auto-discovered skills exist ---
 
-@test "9 skill directories exist with SKILL.md" {
+@test "10 skill directories exist with SKILL.md" {
   count=0
   for skill_dir in skills/*/; do
     [[ -f "$skill_dir/SKILL.md" ]] && ((count++))
   done
-  [[ "$count" -eq 9 ]]
+  [[ "$count" -eq 10 ]]
 }
 
 # --- Auto-discovered agents exist ---

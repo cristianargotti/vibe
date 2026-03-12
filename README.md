@@ -98,6 +98,26 @@ Created PR #15: fix: apply PIX discount before tax calculation
   following AI-CORE-STANDARDS
 ```
 
+### Fix security vulnerabilities
+
+```
+> /vibe:fix-vulnerabilities
+
+Fetching Dependabot alerts...
+Found 4 open alerts (2 critical, 1 high, 1 moderate)
+
+| Package   | CVE            | Severity | Status                       |
+|-----------|----------------|----------|------------------------------|
+| lodash    | CVE-2024-1234  | critical | fixed (4.17.20 → 4.17.21)   |
+| express   | CVE-2024-5678  | critical | fixed (4.18.1 → 4.19.2)     |
+| axios     | CVE-2024-3456  | high     | fixed (1.6.0 → 1.7.4)       |
+| foo-lib   | CVE-2024-9999  | moderate | manual — no fix available    |
+
+Tests: 142 passed, 0 failed
+Commit: fix(deps): resolve 3 security vulnerabilities
+Branch: fix/dependabot-vulnerabilities
+```
+
 ### Pre-deployment check
 
 ```
@@ -121,7 +141,7 @@ Warnings: 3 outdated packages (non-blocking)
 
 Plugin:    PASS  plugin.json + marketplace.json valid
 Hooks:     PASS  5/5 scripts executable
-Skills:    PASS  9/9 SKILL.md with valid frontmatter
+Skills:    PASS  10/10 SKILL.md with valid frontmatter
 Agents:    PASS  3/3 non-empty
 Settings:  PASS  Valid JSON
 Standards: PASS  12/12 files present
@@ -181,17 +201,18 @@ Configuration is saved to `vibe.config.json` (gitignored, per-project). Run `/vi
 
 ## Plugin Skills
 
-| Skill                      | Description                           | Model  |
-| -------------------------- | ------------------------------------- | ------ |
-| `/vibe:setup`              | Interactive configuration wizard      | —      |
-| `/vibe:review-security`    | OWASP-based security review           | Opus   |
-| `/vibe:deploy-check`       | Pre-deployment verification checklist | Sonnet |
-| `/vibe:fix-issue <number>` | Fix GitHub issue with tests           | Opus   |
-| `/vibe:refactor <path>`    | Refactor preserving behavior          | Sonnet |
-| `/vibe:create-pr [base]`   | Structured PR creation                | —      |
-| `/vibe:test <path>`        | Generate and run tests                | —      |
-| `/vibe:health-check`       | Validate plugin configuration         | —      |
-| `/vibe:whats-new`          | Check Claude Code updates             | —      |
+| Skill                       | Description                             | Model  |
+| --------------------------- | --------------------------------------- | ------ |
+| `/vibe:setup`               | Interactive configuration wizard        | —      |
+| `/vibe:review-security`     | OWASP-based security review             | Opus   |
+| `/vibe:deploy-check`        | Pre-deployment verification checklist   | Sonnet |
+| `/vibe:fix-issue <number>`  | Fix GitHub issue with tests             | Opus   |
+| `/vibe:refactor <path>`     | Refactor preserving behavior            | Sonnet |
+| `/vibe:create-pr [base]`    | Structured PR creation                  | —      |
+| `/vibe:test <path>`         | Generate and run tests                  | —      |
+| `/vibe:health-check`        | Validate plugin configuration           | —      |
+| `/vibe:fix-vulnerabilities` | Fix Dependabot security vulnerabilities | —      |
+| `/vibe:whats-new`           | Check Claude Code updates               | —      |
 
 ### Bundled Skills (built into Claude Code)
 
@@ -287,13 +308,14 @@ Version tracking is centralized in `versions.json` (replaces `.claude-code-versi
 
 ## GitHub Automation
 
-| Workflow                     | Trigger                      | Action                                  |
-| ---------------------------- | ---------------------------- | --------------------------------------- |
-| `claude-pr-review.yml`       | PR open/sync, @claude        | Code review against rules and REVIEW.md |
-| `claude-security-review.yml` | PR open/sync                 | OWASP security scan + LGPD checks       |
-| `claude-issue-handler.yml`   | Labels, @claude              | Auto-fix/feature/refactor from issues   |
-| `validate-plugin.yml`        | Push to plugin files, weekly | Plugin structure + version validation   |
-| `check-mcp-versions.yml`     | Weekly                       | MCP version drift + standards freshness |
+| Workflow                         | Trigger                      | Action                                  |
+| -------------------------------- | ---------------------------- | --------------------------------------- |
+| `claude-pr-review.yml`           | PR open/sync, @claude        | Code review against rules and REVIEW.md |
+| `claude-security-review.yml`     | PR open/sync                 | OWASP security scan + LGPD checks       |
+| `claude-issue-handler.yml`       | Labels, @claude              | Auto-fix/feature/refactor from issues   |
+| `claude-fix-vulnerabilities.yml` | Manual dispatch, label       | Auto-fix Dependabot security alerts     |
+| `validate-plugin.yml`            | Push to plugin files, weekly | Plugin structure + version validation   |
+| `check-mcp-versions.yml`         | Weekly                       | MCP version drift + standards freshness |
 
 ### Setup
 
@@ -361,13 +383,14 @@ vibe/
 ├── .claude-plugin/              # Plugin manifest + marketplace
 │   ├── plugin.json
 │   └── marketplace.json
-├── skills/                      # 9 plugin skills (/vibe:*)
+├── skills/                      # 10 plugin skills (/vibe:*)
 │   ├── setup/                   # Interactive wizard
 │   │   ├── SKILL.md
 │   │   └── templates/           # CLAUDE.md, rules, mcp, settings, workflows
 │   ├── review-security/         # OWASP security review
 │   ├── deploy-check/            # Pre-deployment checklist
 │   ├── fix-issue/               # GitHub issue fixer
+│   ├── fix-vulnerabilities/     # Dependabot vulnerability fixer
 │   ├── refactor/                # Behavior-preserving refactor
 │   ├── create-pr/               # Structured PR creation
 │   ├── test/                    # Test generation + execution
@@ -391,7 +414,7 @@ vibe/
 │       └── commit-msg
 ├── docs/standards/              # 12 detailed coding standards
 ├── .claude/rules/               # 5 lean rule files (always loaded)
-├── .github/workflows/           # 5 CI/CD workflows
+├── .github/workflows/           # 6 CI/CD workflows
 ├── settings.json                # Plugin-level default permissions
 ├── versions.json                # Centralized version tracking
 ├── CLAUDE.md                    # Configuration hub

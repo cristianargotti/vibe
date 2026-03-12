@@ -19,6 +19,7 @@
 - `/vibe:test <path>` — Generate and run tests
 - `/vibe:health-check` — Validate plugin configuration
 - `/vibe:whats-new` — Check Claude Code updates
+- `/vibe:fix-vulnerabilities` — Fix Dependabot security vulnerabilities
 
 ## Bundled Skills (built into Claude Code)
 
@@ -103,4 +104,5 @@ When working on a specific technology, read the relevant file in `docs/standards
 - PR Review: automatic on every PR (Claude reviews against `.claude/rules/`)
 - Security Review: automatic OWASP scan on every PR
 - Issue Handler: label issues with `claude-fix`, `claude-feature`, or `claude-refactor`
+- Fix Vulnerabilities: manual dispatch or `claude-security-fix` label to auto-fix Dependabot alerts
 - Plugin Validation: CI checks on every push to skills/hooks/agents

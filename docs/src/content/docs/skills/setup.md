@@ -25,7 +25,7 @@ The setup wizard runs a 6-step interactive flow:
    - Docker
 3. **Security level** — Basic, Standard, or Strict (see [Installation](/vibe/getting-started/installation/) for comparison)
 4. **Integrations** — select MCP servers (GitHub, Context7, Sequential Thinking, AWS, ESLint, Terraform)
-5. **Skills** — choose which of the 9 skills to enable
+5. **Skills** — choose which of the 10 skills to enable
 6. **Generate** — creates all configuration files
 
 ## Generated files
