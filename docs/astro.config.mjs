@@ -22,6 +22,7 @@ export default defineConfig({
         { label: 'GitHub Automation', autogenerate: { directory: 'automation' } },
         { label: 'Configuration', autogenerate: { directory: 'configuration' } },
         { label: 'Standards', autogenerate: { directory: 'standards' } },
+        { label: 'Manual Testing', autogenerate: { directory: 'manual-testing' } },
         { label: 'Guides', autogenerate: { directory: 'guides' } },
         { label: 'Admin', autogenerate: { directory: 'admin' } },
       ],
